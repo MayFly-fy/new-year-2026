@@ -25,56 +25,50 @@
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(135deg, #800000 0%, #d40000 50%, #b30000 100%);
             z-index: -2;
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+        }
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
         /* 祥云纹理遮罩 */
         .cloud-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-image: url('https://www.transparenttextures.com/patterns/pinstriped-suit.png'); /* 细腻纹理 */
+            background-image: url('https://www.transparenttextures.com/patterns/pinstriped-suit.png'); 
             opacity: 0.1; z-index: -1;
         }
-
-        /* 3D 动态灯笼 */
-        .lantern-box {
-            position: fixed; top: -20px; pointer-events: none; z-index: 10;
-            display: flex; width: 100%; justify-content: space-between; padding: 0 10%; box-sizing: border-box;
-        }
-        .lantern {
-            width: 60px; height: 80px; background: #f00; border-radius: 40px/50px;
-            box-shadow: 0 10px 40px rgba(255,0,0,0.5);
-            transform-origin: top center; animation: swing 3s ease-in-out infinite;
-            position: relative; border: 2px solid var(--gold);
-        }
-        .lantern::after { content: "元旦"; color: var(--gold); position: absolute; top: 20px; left: 12px; font-weight: bold; font-size: 14px; width: 14px; line-height: 1.2; }
-        .lantern-line { width: 2px; height: 50px; background: var(--gold); margin: 0 auto; }
-        @keyframes swing { 0%, 100% { transform: rotate(-5deg); } 50% { transform: rotate(5deg); } }
 
         /* 封面样式 */
         #cover { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
             display: flex; flex-direction: column; align-items: center; justify-content: center; 
-            z-index: 100; transition: all 1s ease; background: radial-gradient(circle, #d40000, #800000);
+            z-index: 100; transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
+            background: radial-gradient(circle, #d40000, #800000);
         }
 
         /* 倒计时样式 */
         .countdown {
             color: var(--gold); font-family: "Courier New", monospace;
-            font-size: 1.2rem; margin-bottom: 30px; letter-spacing: 2px;
-            background: rgba(0,0,0,0.2); padding: 10px 20px; border-radius: 20px;
+            font-size: 1.1rem; margin-bottom: 40px; letter-spacing: 2px;
+            background: rgba(0,0,0,0.2); padding: 12px 25px; border-radius: 30px;
+            border: 1px solid rgba(255,204,0,0.3);
         }
 
         .fu-circle {
             width: 140px; height: 140px; background: linear-gradient(45deg, var(--gold), #fff); 
             border-radius: 50%; display: flex; align-items: center; justify-content: center; 
-            font-size: 80px; color: #a40000; box-shadow: 0 0 50px rgba(255, 204, 0, 0.6);
+            font-size: 80px; color: #a40000; box-shadow: 0 0 50px rgba(255, 204, 0, 0.5);
             cursor: pointer; animation: breathe 2s infinite;
         }
-        @keyframes breathe { 0% { transform: scale(1); box-shadow: 0 0 20px var(--gold); } 50% { transform: scale(1.05); box-shadow: 0 0 60px var(--gold); } 100% { transform: scale(1); box-shadow: 0 0 20px var(--gold); } }
+        @keyframes breathe { 0% { transform: scale(1); } 50% { transform: scale(1.08); } 100% { transform: scale(1); } }
 
         /* 内容页 */
         #content { 
             display: none; width: 100%; height: 100%; box-sizing: border-box; 
-            padding: 60px 25px 30px; overflow-y: auto; z-index: 5;
+            padding: 50px 25px 30px; overflow-y: auto; z-index: 5;
         }
 
         .glass-panel {
@@ -83,11 +77,10 @@
             box-shadow: 0 20px 50px rgba(0,0,0,0.4);
         }
 
-        .name-tag { color: var(--gold); font-size: 24px; font-weight: bold; margin-bottom: 20px; border-left: 4px solid var(--gold); padding-left: 15px; }
-        #blessing-text { font-size: 18px; line-height: 2.1; color: var(--text-gold); white-space: pre-wrap; text-align: justify; }
+        .name-tag { color: var(--gold); font-size: 22px; font-weight: bold; margin-bottom: 20px; border-left: 4px solid var(--gold); padding-left: 15px; }
+        #blessing-text { font-size: 18px; line-height: 2; color: var(--text-gold); white-space: pre-wrap; text-align: justify; }
 
-        /* 提示点击交互 */
-        .click-hint { position: fixed; bottom: 20px; color: var(--gold); width: 100%; text-align: center; font-size: 12px; opacity: 0.5; }
+        .click-hint { position: fixed; bottom: 20px; color: var(--gold); width: 100%; text-align: center; font-size: 12px; opacity: 0.4; pointer-events: none; }
     </style>
 </head>
 <body onclick="createFirework(event)">
@@ -95,24 +88,12 @@
     <div class="bg-layer"></div>
     <div class="cloud-overlay"></div>
 
-    <!-- 灯笼装饰 -->
-    <div class="lantern-box">
-        <div><div class="lantern-line"></div><div class="lantern"></div></div>
-        <div><div class="lantern-line"></div><div class="lantern"></div></div>
-    </div>
-
-    <!-- 背景音乐 (使用公开的喜庆纯音乐) -->
-    <audio id="bgm" loop preload="auto">
-        <source src="https://api.uomg.com/api/rand.music?sort=%E7%83%AD%歌%E6%A6%9C" type="audio/mpeg">
-        <!-- 如果上面接口失效，请手动替换为一个MP3链接 -->
-    </audio>
-
     <!-- 封面 -->
     <div id="cover" onclick="openBlessing()">
         <div class="countdown" id="timer">2026 倒计时加载中...</div>
         <div class="fu-circle">福</div>
-        <p class="tap-hint" id="cover-hint" style="color:var(--gold); margin-top:30px; text-align:center;">
-            送给你的专属祝福<br>点击开启 2026 序幕
+        <p class="tap-hint" id="cover-hint" style="color:var(--gold); margin-top:35px; text-align:center; letter-spacing:2px; font-weight:300;">
+            送给你的新年祝福<br>点击开启 2026 序幕
         </p>
     </div>
 
@@ -122,8 +103,8 @@
             <div id="name-display" class="name-tag">Happy New Year</div>
             <div id="blessing-text"></div>
         </div>
-        <div style="height: 100px;"></div> <!-- 留白 -->
-        <p style="text-align: center; color: var(--gold); opacity: 0.6; font-size: 14px;">愿你新的一年，自由如风，璀璨如星 ✨</p>
+        <div style="height: 80px;"></div>
+        <p style="text-align: center; color: var(--gold); opacity: 0.6; font-size: 14px; letter-spacing: 1px;">愿新的一年，自由如风，璀璨如星 ✨</p>
     </div>
 
     <div class="click-hint">点击屏幕任意位置可燃放烟花</div>
@@ -143,7 +124,7 @@
             }
         };
 
-        // 实时倒计时逻辑
+        // 倒计时
         function updateTimer() {
             const now = new Date();
             const target = new Date('2026/01/01 00:00:00');
@@ -158,20 +139,20 @@
             document.getElementById('timer').innerHTML = `距离 2026：${hours}时 ${mins}分 ${secs}秒`;
         }
         setInterval(updateTimer, 1000);
+        updateTimer();
 
         const urlParams = new URLSearchParams(window.location.search);
         const friendName = urlParams.get('to');
 
         if (friendName && config.messages[friendName]) {
-            document.getElementById('cover-hint').innerHTML = `送给 ${friendName} 的专属祝福<br>✨ 点击开启 2026 ✨`;
+            document.getElementById('cover-hint').innerHTML = `送给 ${friendName} 的专属祝福<br>点击开启 2026`;
             document.getElementById('name-display').innerHTML = `致：${friendName}`;
+        } else {
+            document.getElementById('cover-hint').innerHTML = `送给我所有闪闪发光的朋友们<br>点击开启 2026`;
+            document.getElementById('name-display').innerHTML = `致：我的朋友们`;
         }
 
         function openBlessing() {
-            // 尝试播放音乐
-            const bgm = document.getElementById('bgm');
-            bgm.play().catch(()=>{ console.log("等待交互后再播放") });
-
             document.getElementById('cover').style.opacity = '0';
             document.getElementById('cover').style.transform = 'scale(2)';
             setTimeout(() => {
@@ -193,18 +174,18 @@
                     if(i % 5 === 0) document.getElementById('content').scrollTop = document.getElementById('content').scrollHeight;
                 } else {
                     clearInterval(timer);
-                    setInterval(() => createFirework({clientX: Math.random()*window.innerWidth, clientY: Math.random()*window.innerHeight}), 2000);
+                    // 打完字后自动随机放点小烟花
+                    setInterval(() => createFirework({clientX: Math.random()*window.innerWidth, clientY: Math.random()*window.innerHeight}), 2500);
                 }
             }, speed);
         }
 
-        // 烟花交互逻辑
         function createFirework(e) {
             const x = e.clientX / window.innerWidth;
             const y = e.clientY / window.innerHeight;
             confetti({
-                particleCount: 30,
-                spread: 70,
+                particleCount: 25,
+                spread: 60,
                 origin: { x, y },
                 colors: ['#ffcc00', '#ff0000', '#ffffff', '#ffebad']
             });
