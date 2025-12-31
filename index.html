@@ -6,85 +6,218 @@
     <title>2026 新年快乐</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #a40000; font-family: "Microsoft YaHei", "PingFang SC", sans-serif; }
-        #cover { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle, #d40000, #800000); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; transition: opacity 0.8s; cursor: pointer; }
-        .envelope { width: 120px; height: 120px; background: #ffcc00; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 60px; color: #a40000; animation: breathe 2s infinite; box-shadow: 0 0 30px rgba(255, 204, 0, 0.4); }
-        @keyframes breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
-        .tap-hint { color: #ffcc00; margin-top: 25px; letter-spacing: 2px; text-align: center; line-height: 1.6; }
-        #content { display: none; width: 100%; height: 100%; box-sizing: border-box; padding: 30px 25px; overflow-y: auto; background: #a40000; color: #ffebad; }
-        .year { font-size: 50px; font-weight: bold; margin-bottom: 10px; opacity: 0.2; text-align: center; }
-        #blessing-text { font-size: 18px; line-height: 1.8; white-space: pre-wrap; margin-bottom: 50px; text-align: justify; }
-        .footer { padding-bottom: 30px; text-align: center; font-size: 14px; opacity: 0.6; color: #ffcc00; }
+        :root {
+            --gold: #ffcc00;
+            --dark-red: #800000;
+            --bright-red: #d40000;
+            --text-color: #ffebad;
+        }
+
+        body, html { 
+            margin: 0; padding: 0; width: 100%; height: 100%; 
+            overflow: hidden; 
+            background: linear-gradient(135deg, #a40000 0%, #d40000 50%, #800000 100%);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            font-family: "Microsoft YaHei", "PingFang SC", sans-serif; 
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* 金粉漂浮特效 */
+        .sparkle {
+            position: absolute;
+            background: var(--gold);
+            border-radius: 50%;
+            opacity: 0.6;
+            pointer-events: none;
+            animation: drift linear infinite;
+        }
+        @keyframes drift {
+            from { transform: translateY(-10vh) translateX(0); opacity: 1; }
+            to { transform: translateY(110vh) translateX(100px); opacity: 0; }
+        }
+
+        /* 封面样式升级 */
+        #cover { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            z-index: 100; transition: all 1s ease;
+        }
+        
+        .envelope-wrapper {
+            position: relative;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .envelope-halo {
+            position: absolute;
+            width: 140px; height: 140px;
+            background: var(--gold);
+            border-radius: 50%;
+            filter: blur(20px);
+            animation: pulse 2s infinite;
+            opacity: 0.3;
+        }
+
+        .envelope { 
+            position: relative;
+            width: 110px; height: 110px; 
+            background: linear-gradient(45deg, var(--gold), #fff7d1); 
+            border-radius: 50%; display: flex; align-items: center; justify-content: center; 
+            font-size: 55px; color: #a40000; font-weight: bold;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            cursor: pointer; z-index: 2;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.3; }
+            50% { transform: scale(1.5); opacity: 0.1; }
+            100% { transform: scale(1); opacity: 0.3; }
+        }
+
+        .tap-hint { 
+            color: var(--gold); margin-top: 40px; letter-spacing: 3px; 
+            text-align: center; line-height: 1.8; font-weight: 300;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        /* 内容页装饰升级 */
+        #content { 
+            display: none; width: 100%; height: 100%; box-sizing: border-box; 
+            padding: 40px 25px; overflow-y: auto; position: relative;
+        }
+
+        .decoration-corner {
+            position: fixed; width: 80px; height: 80px; 
+            border: 2px solid var(--gold); opacity: 0.4;
+        }
+        .top-left { top: 20px; left: 20px; border-right: none; border-bottom: none; }
+        .bottom-right { bottom: 20px; right: 20px; border-left: none; border-top: none; }
+
+        .year { 
+            font-size: 70px; font-weight: 900; margin-bottom: 20px; 
+            color: var(--gold); opacity: 0.15; text-align: center;
+            letter-spacing: 10px;
+        }
+
+        #blessing-container {
+            background: rgba(130, 0, 0, 0.4);
+            border: 1px solid rgba(255, 204, 0, 0.2);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.2);
+            backdrop-filter: blur(5px);
+        }
+
+        #blessing-text { 
+            font-size: 18px; line-height: 2; color: var(--text-color);
+            white-space: pre-wrap; text-align: justify;
+        }
+
+        .footer { 
+            margin-top: 40px; padding-bottom: 40px; text-align: center; 
+            font-size: 13px; opacity: 0.6; color: var(--gold); letter-spacing: 1px;
+        }
+
+        /* 隐藏滚动条 */
+        #content::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body>
 
+    <!-- 动态背景星光 -->
+    <div id="particles"></div>
+
     <div id="cover" onclick="openBlessing()">
-        <div class="envelope">福</div>
-        <p class="tap-hint" id="cover-hint">送给你的新年祝福<br>点击开启 2026</p>
+        <div class="envelope-wrapper">
+            <div class="envelope-halo"></div>
+            <div class="envelope">福</div>
+        </div>
+        <p class="tap-hint" id="cover-hint">送给你的新年祝福<br>—— 点击开启 2026 ——</p>
     </div>
 
     <div id="content">
+        <div class="decoration-corner top-left"></div>
+        <div class="decoration-corner bottom-right"></div>
+        
         <div class="year">2026</div>
-        <div id="blessing-text"></div>
+        
+        <div id="blessing-container">
+            <div id="blessing-text"></div>
+        </div>
+        
         <div class="footer">愿我们继续在各自的轨道上发光 ✨</div>
     </div>
 
     <script>
+        // --- 依然保留你的祝福语逻辑 ---
         const config = {
-            // --- 这是对所有人的普遍祝福 ---
             "default": "致我所有闪闪发光的朋友们：\n\n新年快乐！🎆\n\n这一年，我们散落在不同的经纬度上——有人在书桌前攀登知识的峭壁，有人在实验室里解码未来的方程式，有人在复读的赛道上二次启航，也有人正探索着大学时光的无数可能。\n\n愿你们在属于自己的战场里，每份专注都落地生花，每次尝试都积蓄力量。愿笔尖流出的答案、键盘敲出的代码、调试通过的数据，都成为你们通往理想生活的密钥。\n\n更愿你们在奋斗的间隙，永远保有让自己快乐的能力。去吹风，去舞蹈，去看一场期待已久的演出；去大笑，去相遇，去收藏日常里微小的浪漫。愿你们眼角常有光，心头常柔软，在成为“厉害大人”的路上，也别忘了做那个“容易开心的小孩”。\n\n感谢你们又陪我走过了一程山水。新的一年，愿我们继续在各自的轨道上发光，也在彼此需要时随时亮起——就像星星分散在天幕，却始终共享着同一片银河。\n\n祝我的朋友们：前程有奔赴，生活有回甘，身边永远有清风与花开。\n\n2026，我们一起往前走吧！✨",
-            
             "messages": {
-                "任美伊": "嘿，新年快乐！ 🌟\n新的一年马上到啦，祝你像初升的朝阳一样闪闪发光，每一天都自信满满，做最明亮的自己！🎉\n\n过去的日子或许有些颠簸与曲折，但崭新的篇章已经打开。愿你把所有沉重的、烦心的都轻轻放下，像抖落肩上的雪花一样，转身迎接一片晴空。✨\n\n勇敢的闯过高考的难关，站在大学的全新的起点。2026年会是一个更轻盈、更自在的开始——愿你脚步轻快，笑容常在，眼里永远盛着对明天的期待。\n\n记得多为自己骄傲哦，在关注别人闪光点的同时，也请你相信你自己也是美丽活泼善良的人。另外，比起精致的妆容，我觉得你的性格才是让你发光的魔法！🎈\n新年快乐，万事皆甜～",
-                
+                "任美伊": "嘿，新年快乐！ 🌟\n新的一年马上到啦，祝你像初升的朝阳一样闪闪发光，每一天都自信满满，做最明亮的自己！🎉\n\n过去的日子或许有些颠簸与曲折，但崭新的篇章已经打开。愿你把所有沉重的、烦心的都轻轻放下，像抖落肩上的雪花一样，转身迎接一片晴空。✨\n\n勇敢的闯过高考的难关，站在大学的全新的起点。2026年会是一个更轻盈、更自在的开始——愿你脚步轻快，笑容常在，眼里永远盛着对明天的期待。\n\n记得多为自己骄傲哦，比起精致的妆容，我觉得你的性格才是让你发光的魔法！🎈\n新年快乐，万事皆甜～",
                 "荆博暄": "嗨，新年快乐！ 🌸\n生活不止有眼前的ppt，还有诗和远方。\n\n新的一年，愿所有烦人的任务、压榨人的琐事，都像被一键删除的草稿一样——彻底清空！你值得被温柔以待，就像你总在别人低落时递上阳光那样。☀️\n\n特别想谢谢你，在我需要时给过的安慰和拥抱。你身上有种温暖又明亮的力量，能让周围的人都跟着轻松起来。2026年，愿这份力量更多回馈到你自己身上：少点熬夜赶工，多点从容微笑；少为别人的事操心，多让自己尽情绽放。\n\n新年的钟声会敲走所有疲惫，未来等着你的，一定是更轻盈、更敞亮的日子。毕竟，像你这样又美又飒又善解人意的女孩，运气当然要配得上你的努力！✨\n\n记得照顾好自己，你笑起来的样子才是最美的风景～\n新年快乐，万事顺意，自由如风！🎈",
-                
                 "武蓉萱": "那些与小车反复调试的深夜，那些在比赛节点前精密计算的时刻——它们塑造了你理性而清晰的模样。使我永远记得你可靠的模样。\n\n新的一年，愿你的世界既有逻辑的优美，也有诗意的轻盈。愿电路接通灵感，代码书写从容，而你在现实与幻想之间，永远保有自己温柔的平衡。\n\n前路或许仍有需要攻坚的赛道，但你不必总是跑得太急。偶尔停下来，看看云，或者进入二游的箱庭——那里有另一场属于你的、不必赶时间的冒险。\n\n祝你，在新的一年里，调试顺利，灵感常驻，永远是自己宇宙里最清醒的建造者。",
-                
                 "晋伊": "新年快乐呀！🎉\n\n给你送上2026年“特别定制版”祝福——祝你的代码像手势舞一样丝滑流畅，bug率比体重下降得还快！希望新一年你的终端里满是绿色的✅，生活里全是粉色的泡泡💕\n\n祝你的2026像完美部署的程序：该相遇的总会相遇，该运行的一路顺畅！愿你在明年的此刻不仅仅只是此刻姐姐与姐夫的“电灯泡”，也会在新的一年收获自己的甜蜜～\n\n记住哦，世界上最棒的算法就是：你的快乐+你的热爱+一点小幸运！2026，愿你的生活永远运行在“开心模式”，每天都有新成就，每个周末都有小惊喜！\n\n要一直做那个让代码跳舞、让日子发光的可爱女孩呀！💻💃\n新年快乐～",
-                
                 "刘家奕": "致正在穿越复读副本的你：\n\n新年快乐呀！🎇\n知道你现在正和试卷题库进行着“长期作战”，但别忘了——你可是那个能把《银魂》精神贯彻到现实的古灵精怪少女！愿你的笔像洞爷湖木刀一样，劈开所有难题；愿你的课桌比万事屋的委托板更承载热血与可能✨\n\n新的一年，愿你的异想天开永远比错题本厚，愿你的脑洞宇宙持续扩张到银河系外🌌！即使面对重复的日常，也请继续用奇思妙想给生活涂上粉色荧光笔——毕竟，这个世界需要像你这样“不按常理出牌”的耀眼存在💖\n\n偶尔累的时候，记得像银时一样躺平吃草莓牛奶，或者对着肌肉男海报振臂高呼“这就是青春！”——没什么比保持你的野生棱角更重要的了！\n\n2026，愿你的努力像JUMP漫画分镜一样逐帧兑现，愿你的目标在结局页被打上金光闪闪的“完胜”！\n\n等你从“复读战场”荣耀归来——未来的大学生活，一定会对你喊：“欢迎来到更酷的副本！”\n冲呀！！💪🍓",
-                
                 "孙逸莹": "祝福给在西安的你：\n新年快乐！🏮\n\n从保定的校园走到西安的城墙下，距离改变了许多，但没改变你身上那种让人安心的力量。每当想起初中时你总能把杂乱的事情理顺，就特别感慨——你始终是那个值得信赖的女孩。\n\n长安的月色应该很美吧？愿新一年的你，在古老的城市里书写崭新的故事。少为未知焦虑，多在当下微笑；十三朝古都的砖瓦见证过无数风雨，而你的坚韧，也一定能被时光温柔以待。\n\n愿你的2026像西安的晨钟暮鼓——踏实而从容，既有历史的厚重，也有年轻的朝气。偶尔在忙碌的课业间隙，做个简单的女孩：去城墙上吹吹风，在巷子里找找美食，让烦恼像街角蒸腾的热气，渐渐飘散。\n\n你总是稳稳地走在自己的轨道上，但请记得：可靠如你，也完全有资格卸下担子，享受轻快的时光。\n\n新年快乐，我亲爱的老朋友！愿你在异乡的星空下，始终被温暖环绕，永远眉眼弯弯✨",
-                
                 "陈奕伽": "给正在蓄力冲刺的你：\n新年快乐！✨\n\n知道此刻的你正埋头于书山题海，用每一支写完的笔芯标记着通往梦想的距离。\n\n你曾说想去南方，想去看大湾区的海与灯火。愿这个念头成为你卷子间隙抬头时，眼底最亮的那颗星。愿六月的答卷，终将兑现你所有的早读与深夜；愿九月的列车，真能载你抵达暖风扑面的海岸线。\n\n压力偶尔会像窗外的暮色一样压下来，但请记得：你从来不是独自在战斗。这十几年友情攒下的“能量包”，随时可以为你续航～累了就想想我们一起干的傻事，想想南方湿润的风和等着你的崭新故事。\n\n2026年，愿你的笔尖有光，心中有岸。愿每一次模拟考都成为向上的台阶，每一点努力都沉淀为底气。高考不过是人生其中一场探险，而你早已拥有闯关的勇气与灵动。\n\n等你六月凯旋，我们一定要好好庆祝，为你，也为这段闪着泪与笑的青春。\n加油，亲爱的老朋友！🌊\n你值得所有美好，包括正奔赴而来的、那片南方的海。",
-                
                 "李晨昱": "给正在重新绘制蓝图的你：\n\n新年快乐呀！✨\n知道此刻的你正埋首在另一轮四季的耕耘里，用旧日的勇气体面地面对崭新的挑战。复读的时光像是写给未来的密信——每一笔落下都需要加倍的认真。\n\n你总是像小太阳一样温暖着身边的人，连带着把那些难解的题目都照得柔和了几分。新的一年，愿你在照顾世界的同时，更被世界温柔照料；愿你的勤奋与善良，都能兑换成六月最明亮的答案。\n\n压力偶尔会悄悄爬上肩头，但请记住：你从来不是孤身一人。那些你曾给予他人的理解与鼓励，现在正以更大的能量回流向你。如果累了，就忙里挑闲放松一下吧，或者在假期向我诉苦。\n\n2026年，愿你的课桌洒满笃定的光，愿 your 笔记里藏着渐近的梦想。每一次提问都是向上的台阶，每一份耐心都在铺就更宽阔的路。\n\n请一定继续保持那份珍贵的天真与热忱——那是你最动人的底色，也是时光最想珍藏的模样。\n\n等到盛夏的风吹来好消息时，我一定会为你好好庆祝，为你这段用勇气重新雕刻的、闪闪发光的旅程。\n加油，我亲爱的朋友！🌟\n你值得所有美好，包括那个正在奔跑而来的、光明的未来。"
             }
         };
+
+        // 创建金粉特效
+        function createSparkles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 30; i++) {
+                const sparkle = document.createElement('div');
+                sparkle.className = 'sparkle';
+                const size = Math.random() * 4 + 2 + 'px';
+                sparkle.style.width = size;
+                sparkle.style.height = size;
+                sparkle.style.left = Math.random() * 100 + 'vw';
+                sparkle.style.animationDuration = Math.random() * 5 + 5 + 's';
+                sparkle.style.animationDelay = Math.random() * 5 + 's';
+                container.appendChild(sparkle);
+            }
+        }
+        createSparkles();
 
         const urlParams = new URLSearchParams(window.location.search);
         const friendName = urlParams.get('to');
 
         if (friendName && config.messages[friendName]) {
-            document.getElementById('cover-hint').innerHTML = `送给 ${friendName} 的专属祝福<br>点击开启 2026`;
-        } else {
-            document.getElementById('cover-hint').innerHTML = `送给我所有闪闪发光的朋友们<br>点击开启 2026`;
+            document.getElementById('cover-hint').innerHTML = `送给 ${friendName} 的专属祝福<br>✨ 点击开启 2026 ✨`;
         }
 
         function openBlessing() {
             document.getElementById('cover').style.opacity = '0';
+            document.getElementById('cover').style.transform = 'scale(1.2)';
             setTimeout(() => {
                 document.getElementById('cover').style.display = 'none';
                 document.getElementById('content').style.display = 'block';
                 startTyping();
                 launchConfetti();
-            }, 800);
+            }, 1000);
         }
 
         function startTyping() {
             const finalMessage = config.messages[friendName] || config.default;
             let i = 0;
             const container = document.getElementById('blessing-text');
-            // 针对普遍祝福的极长文本，稍微调快一点速度
             const speed = finalMessage.length > 300 ? 40 : 65; 
             const timer = setInterval(() => {
                 if (i < finalMessage.length) {
                     container.innerHTML += finalMessage.charAt(i);
                     i++;
-                    // 自动滚动到底部
-                    if(i % 5 === 0) container.parentElement.scrollTop = container.parentElement.scrollHeight;
+                    if(i % 5 === 0) {
+                        const contentDiv = document.getElementById('content');
+                        contentDiv.scrollTop = contentDiv.scrollHeight;
+                    }
                 } else {
                     clearInterval(timer);
                     setInterval(launchConfetti, 4000);
@@ -93,7 +226,9 @@
         }
 
         function launchConfetti() {
-            confetti({ particleCount: 70, spread: 70, origin: { y: 0.7 }, colors: ['#ffcc00', '#ffffff', '#ff0000'] });
+            const colors = ['#ffcc00', '#ffffff', '#ff4d4d', '#fffae3'];
+            confetti({ particleCount: 40, angle: 60, spread: 55, origin: { x: 0, y: 0.8 }, colors: colors });
+            confetti({ particleCount: 40, angle: 120, spread: 55, origin: { x: 1, y: 0.8 }, colors: colors });
         }
     </script>
 </body>
