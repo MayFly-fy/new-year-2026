@@ -3,64 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>跨年快乐！</title>
-    <!-- 引入彩带特效库 -->
+    <title>新年快乐！</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
-        body, html {
-            margin: 0; padding: 0; width: 100%; height: 100%;
-            overflow: hidden; background-color: #a40000;
-            font-family: "Microsoft YaHei", sans-serif;
-        }
-
-        /* 封面样式 */
-        #cover {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle, #d40000, #800000);
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            z-index: 100; transition: opacity 0.8s;
-        }
-
-        .envelope {
-            width: 150px; height: 150px; background: #ffcc00; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 80px; color: #a40000; cursor: pointer;
-            box-shadow: 0 0 30px rgba(255, 204, 0, 0.5);
-            animation: breathe 2s infinite;
-        }
-
-        @keyframes breathe {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
-        }
-
-        .tap-hint { color: #ffcc00; margin-top: 20px; letter-spacing: 2px; }
-
-        /* 内容样式 */
-        #content {
-            display: none; padding: 40px 20px; text-align: center; color: #ffebad;
-        }
-
-        .year { font-size: 80px; font-weight: bold; margin-bottom: 10px; opacity: 0.2; }
-        
-        #blessing-text {
-            font-size: 24px; line-height: 1.8; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-            white-space: pre-wrap;
-        }
-
-        .footer { position: fixed; bottom: 30px; width: 100%; text-align: center; font-size: 14px; opacity: 0.7; color: #ffcc00;}
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #a40000; font-family: "Microsoft YaHei", sans-serif; }
+        #cover { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle, #d40000, #800000); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; transition: opacity 0.8s; }
+        .envelope { width: 150px; height: 150px; background: #ffcc00; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 80px; color: #a40000; cursor: pointer; animation: breathe 2s infinite; box-shadow: 0 0 30px rgba(255, 204, 0, 0.5); }
+        @keyframes breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+        .tap-hint { color: #ffcc00; margin-top: 20px; letter-spacing: 2px; text-align: center; }
+        #content { display: none; padding: 40px 20px; text-align: center; color: #ffebad; }
+        .year { font-size: 60px; font-weight: bold; margin-bottom: 10px; opacity: 0.3; }
+        #blessing-text { font-size: 22px; line-height: 1.8; white-space: pre-wrap; text-align: left; display: inline-block; }
+        .footer { position: fixed; bottom: 30px; width: 100%; text-align: center; font-size: 14px; opacity: 0.7; color: #ffcc00; }
     </style>
 </head>
 <body>
 
-    <!-- 封面 -->
     <div id="cover" onclick="openBlessing()">
         <div class="envelope">福</div>
-        <p class="tap-hint">点击开启 2026 的祝福</p>
+        <p class="tap-hint" id="cover-hint">送给你的新年祝福<br>(点击开启)</p>
     </div>
 
-    <!-- 祝福内容 -->
     <div id="content">
         <div class="year">2026</div>
         <div id="blessing-text"></div>
@@ -68,10 +31,31 @@
     </div>
 
     <script>
-        const text = "亲爱的朋友：\n\n新年的钟声即将敲响，\n愿你在2026年里：\n眼里有光，心中有爱，\n所求皆如愿，所行皆坦途。\n\n元旦快乐！🎉";
-        
+        // --- 这里的配置区域你可以自由修改 ---
+        const config = {
+            // 默认祝福语（如果链接里没带名字，就显示这个）
+            "default": "亲爱的朋友：\n\n新年的钟声即将敲响，\n愿你在2026年里：\n眼里有光，心中有爱，\n所求皆如愿，所行皆坦途。\n\n元旦快乐！🎉",
+            
+            // 专属祝福语库（名字要和链接里的对应）
+            "messages": {
+                "小明": "嘿，小明！\n新的一年祝你：\n代码无Bug，工资翻几倍！\n早日脱单，游戏上分如喝水。\n咱们2026继续一起开黑！🎮",
+                
+                "王姐": "亲爱的王姐：\n感谢你过去一年的照顾。\n祝你在2026年：\n容颜永驻，升职加薪，\n所有的烦恼都随烟花散去！🌸",
+                
+                "阿强": "阿强：\n听说你2026年有个大计划？\n祝你马到成功！\n身体倍儿棒，吃嘛嘛香！\n跨年夜记得少喝点。🍻"
+            }
+        };
+
+        // 获取链接里的名字参数 (?to=名字)
+        const urlParams = new URLSearchParams(window.location.search);
+        const friendName = urlParams.get('to');
+
+        // 修改封面提示词
+        if (friendName) {
+            document.getElementById('cover-hint').innerHTML = `送给 ${friendName} 的专属祝福<br>(点击开启)`;
+        }
+
         function openBlessing() {
-            // 1. 隐藏封面
             document.getElementById('cover').style.opacity = '0';
             setTimeout(() => {
                 document.getElementById('cover').style.display = 'none';
@@ -82,44 +66,23 @@
         }
 
         function startTyping() {
+            // 根据名字选择祝福语
+            const finalMessage = config.messages[friendName] || config.default;
             let i = 0;
             const container = document.getElementById('blessing-text');
             const timer = setInterval(() => {
-                if (i < text.length) {
-                    container.innerHTML += text.charAt(i);
+                if (i < finalMessage.length) {
+                    container.innerHTML += finalMessage.charAt(i);
                     i++;
                 } else {
                     clearInterval(timer);
-                    // 结束后循环喷点小彩带
                     setInterval(launchConfetti, 3000);
                 }
-            }, 100);
+            }, 800 / (finalMessage.length / 10)); // 自动调整打字速度
         }
 
         function launchConfetti() {
-            var duration = 3 * 1000;
-            var end = Date.now() + duration;
-
-            (function frame() {
-              confetti({
-                particleCount: 5,
-                angle: 60,
-                spread: 55,
-                origin: { x: 0 },
-                colors: ['#ffcc00', '#ffffff', '#ff0000']
-              });
-              confetti({
-                particleCount: 5,
-                angle: 120,
-                spread: 55,
-                origin: { x: 1 },
-                colors: ['#ffcc00', '#ffffff', '#ff0000']
-              });
-
-              if (Date.now() < end) {
-                requestAnimationFrame(frame);
-              }
-            }());
+            confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#ffcc00', '#ffffff', '#ff0000'] });
         }
     </script>
 </body>
