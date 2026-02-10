@@ -4,285 +4,222 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>2026 年度限定祝福</title>
-    <!-- 引入外部动画库和特效库 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root {
-            --deep-red: #8e0000;
-            --silk-red: #d40000;
-            --gold-light: #ffe58f;
-            --gold-main: #ffcc00;
+            --gold: #ffcc00;
+            --red: #a40000;
             --glass: rgba(255, 255, 255, 0.1);
         }
 
-        * { -webkit-tap-highlight-color: transparent; outline: none; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; color: #fff7d1; font-family: "PingFang SC", "Microsoft YaHei", sans-serif; }
 
-        body, html { 
-            margin: 0; padding: 0; width: 100%; height: 100%; 
-            overflow: hidden; background: #000;
-            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
-            color: var(--gold-light);
-        }
+        /* 背景：红金流光 */
+        .bg { position: fixed; width: 100%; height: 100%; background: radial-gradient(circle at center, #d40000 0%, #600000 100%); z-index: -1; }
+        .bg-pattern { position: fixed; width: 100%; height: 100%; background-image: url('https://www.transparenttextures.com/patterns/pinstriped-suit.png'); opacity: 0.1; z-index: -1; }
 
-        /* 动态流动背景层 */
-        .universe {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at center, var(--silk-red) 0%, var(--deep-red) 100%);
-            z-index: -2;
-        }
+        /* 页面容器 */
+        .container { position: relative; width: 100%; height: 100%; transition: transform 0.6s cubic-bezier(0.65, 0, 0.35, 1); }
+        .page { position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 30px; flex-shrink: 0; }
 
-        /* 金粉粒子背景 */
-        #particle-canvas {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -1; pointer-events: none; opacity: 0.6;
-        }
-
-        /* 统一居中容器 */
-        .stage {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-            padding: 40px 30px; box-sizing: border-box;
-        }
-
-        .hidden { display: none !important; opacity: 0; transform: scale(0.9); }
-
-        /* --- 封面样式 --- */
-        #cover-stage .portal {
-            width: 160px; height: 160px;
-            background: linear-gradient(135deg, var(--gold-main), #fff 100%);
-            border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            font-size: 90px; color: var(--deep-red);
-            box-shadow: 0 0 60px rgba(255, 204, 0, 0.4);
-            cursor: pointer; position: relative;
-        }
-        .portal-ring {
-            position: absolute; width: 100%; height: 100%;
-            border: 2px solid var(--gold-main); border-radius: 50%;
-            animation: ring-pulse 2s infinite;
-        }
-        @keyframes ring-pulse {
-            0% { transform: scale(1); opacity: 0.8; }
-            100% { transform: scale(1.6); opacity: 0; }
-        }
-
-        /* --- 道歉卡片样式 --- */
-        .apology-card {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 204, 0, 0.3);
-            border-radius: 24px; padding: 40px 20px;
-            text-align: center; max-width: 320px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-        }
-
-        /* --- 主报告样式 --- */
-        .report-card {
-            width: 100%; max-width: 400px;
-            background: rgba(0, 0, 0, 0.25);
-            backdrop-filter: blur(15px);
-            border-radius: 30px; border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 35px 25px; position: relative;
-            max-height: 80vh; display: flex; flex-direction: column;
-        }
-
-        .report-header {
-            font-size: 14px; letter-spacing: 4px; opacity: 0.6;
-            margin-bottom: 20px; border-bottom: 1px solid rgba(255,204,0,0.2); padding-bottom: 10px;
-        }
-
-        .report-name {
-            font-size: 28px; font-weight: bold; margin-bottom: 25px;
-            background: linear-gradient(to right, var(--gold-light), #fff);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        }
-
-        .report-body {
-            font-size: 17px; line-height: 1.8; color: #fff;
-            overflow-y: auto; flex: 1; padding-right: 5px;
-            mask-image: linear-gradient(to bottom, black 90%, transparent 100%);
-        }
-
-        .report-body::-webkit-scrollbar { width: 3px; }
-        .report-body::-webkit-scrollbar-thumb { background: var(--gold-main); border-radius: 10px; }
-
-        .report-footer {
-            margin-top: 25px; font-size: 12px; opacity: 0.5; text-align: center;
-        }
-
-        /* 按钮样式 */
-        .btn-gold {
-            background: var(--gold-main); color: var(--deep-red);
-            border: none; padding: 14px 40px; border-radius: 50px;
-            font-weight: bold; font-size: 16px; cursor: pointer;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-            transition: transform 0.2s; margin-top: 20px;
-        }
-        .btn-gold:active { transform: scale(0.95); }
+        /* 磨砂玻璃卡片 */
+        .card { background: rgba(0, 0, 0, 0.3); backdrop-filter: blur(15px); border: 1px solid rgba(255, 204, 0, 0.2); border-radius: 24px; padding: 30px 20px; width: 100%; max-width: 350px; position: relative; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
 
         /* 装饰元素 */
-        .corner-deco {
-            position: absolute; width: 40px; height: 40px; border: 1px solid var(--gold-main);
-        }
+        .keyword-badge { display: inline-block; padding: 4px 12px; border: 1px solid var(--gold); border-radius: 4px; font-size: 12px; color: var(--gold); margin-bottom: 15px; letter-spacing: 2px; }
+        .page-num { position: absolute; bottom: 30px; font-family: serif; font-style: italic; opacity: 0.4; font-size: 14px; }
+
+        /* 标题与文字 */
+        h1 { font-size: 26px; color: var(--gold); margin: 10px 0 20px; text-align: center; letter-spacing: 2px; }
+        p { font-size: 17px; line-height: 1.8; text-align: justify; margin: 0; opacity: 0.95; }
+
+        /* 按钮 */
+        .btn-next { background: var(--gold); color: #800000; border: none; padding: 12px 30px; border-radius: 30px; font-weight: bold; margin-top: 30px; font-size: 15px; cursor: pointer; box-shadow: 0 5px 15px rgba(255,204,0,0.3); }
+
+        /* 道歉弹窗 */
+        #apology-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px; }
+        
+        /* 进场动画补丁 */
+        .active-text { animation: fadeInUp 1s forwards; }
+
+        /* 进度条 */
+        .progress-bar { position: fixed; top: 0; left: 0; height: 3px; background: var(--gold); transition: width 0.3s; z-index: 100; }
     </style>
 </head>
-<body onclick="createFirework(event)">
+<body>
 
-    <div class="universe"></div>
-    <canvas id="particle-canvas"></canvas>
+    <div class="bg"></div>
+    <div class="bg-pattern"></div>
+    <div class="progress-bar" id="p-bar" style="width: 0%"></div>
 
-    <!-- 1. 封面阶段 -->
-    <div id="cover-stage" class="stage">
-        <div class="animate__animated animate__fadeInDown" style="text-align: center; margin-bottom: 40px;">
-            <div style="font-size: 14px; letter-spacing: 5px; opacity: 0.8;">LIMITED EDITION</div>
-            <div style="font-size: 48px; font-weight: 900; color: var(--gold-main); margin-top: 10px;">2026</div>
-            <div id="countdown" style="font-family: monospace; font-size: 14px; margin-top: 5px; opacity: 0.6;">Loading...</div>
-        </div>
-        
-        <div class="portal animate__animated animate__zoomIn" onclick="nextStep()">
-            <div class="portal-ring"></div>
-            福
-        </div>
-        
-        <div class="animate__animated animate__fadeInUp" style="margin-top: 50px; text-align: center;">
-            <p id="cover-text" style="font-size: 16px; letter-spacing: 2px;">点击进入年度报告</p>
+    <!-- 1. 封面 -->
+    <div id="main-view" style="width:100%; height:100%; display: flex; flex-direction: column;">
+        <div id="pages-container" class="container">
+            
+            <!-- Page 1: 封面 -->
+            <section class="page">
+                <div class="animate__animated animate__zoomIn" style="text-align:center;">
+                    <div style="font-size: 14px; letter-spacing: 5px; opacity: 0.7;">2026 EXCLUSIVE</div>
+                    <h2 id="user-name" style="font-size: 45px; margin: 20px 0; color: var(--gold);">你好</h2>
+                    <div class="keyword-badge" id="user-keyword">正在载入关键词</div>
+                    <p style="text-align:center; opacity:0.8;">这是为你准备的年度总结报告</p>
+                    <button class="btn-next" onclick="scrollPage(1)">开启报告</button>
+                </div>
+            </section>
+
+            <!-- Page 2: 回忆 -->
+            <section class="page">
+                <div class="card">
+                    <div class="keyword-badge">CHAPTER 01 · 回首</div>
+                    <h1 id="p2-title">过去的一年</h1>
+                    <p id="p2-text"></p>
+                    <button class="btn-next" onclick="scrollPage(2)">继续阅读</button>
+                </div>
+                <div class="page-num">01 / 03</div>
+            </section>
+
+            <!-- Page 3: 展望 -->
+            <section class="page">
+                <div class="card">
+                    <div class="keyword-badge">CHAPTER 02 · 启程</div>
+                    <h1 id="p3-title">2026 的期许</h1>
+                    <p id="p3-text"></p>
+                    <button class="btn-next" onclick="scrollPage(3)">查看寄语</button>
+                </div>
+                <div class="page-num">02 / 03</div>
+            </section>
+
+            <!-- Page 4: 结局 -->
+            <section class="page">
+                <div class="card">
+                    <div class="keyword-badge">CHAPTER 03 · 守护</div>
+                    <h1>永远在身后</h1>
+                    <p id="p4-text"></p>
+                    <button class="btn-next" onclick="location.reload()" style="background:transparent; border:1px solid var(--gold); color:var(--gold);">重新开启</button>
+                </div>
+                <div class="page-num">03 / 03</div>
+                <div style="margin-top: 40px; font-size: 12px; opacity: 0.5;">点击屏幕任意位置燃放烟花</div>
+            </section>
         </div>
     </div>
 
-    <!-- 2. 特殊：道歉阶段 (仅刘家易可见) -->
-    <div id="apology-stage" class="stage hidden">
-        <div class="apology-card animate__animated animate__backInUp">
-            <div style="font-size: 40px; margin-bottom: 20px;">🙇‍♀️</div>
-            <h2 style="color: var(--gold-main); margin-bottom: 15px;">特别更正声明</h2>
-            <p style="font-size: 16px; line-height: 1.6; opacity: 0.9;">
-                在 2026 报告生成的最后时刻，<br>
-                我们发现了一个严重的“笔误”：<br><br>
-                <span style="font-size: 20px; color: #fff; border-bottom: 2px solid var(--gold-main);">刘家易</span><br><br>
-                才是你最闪闪发光的名字！<br>
-                对不起，家易，原谅我的粗心~
+    <!-- 道歉弹窗 -->
+    <div id="apology-overlay">
+        <div class="card animate__animated animate__bounceIn" style="text-align: center;">
+            <h2 style="color: var(--gold);">🙇‍♀️ 特别更正声明</h2>
+            <p style="margin: 20px 0;">
+                系统检测到刚才在输入名字时发生了严重偏移！<br><br>
+                <span style="font-size: 22px; color: #fff;">刘家易</span><br><br>
+                对不起，家易！由于我的粗心把名字打错了。请接受这份诚挚的道歉~
             </p>
-            <button class="btn-gold" onclick="showReport()">接受道歉并进入报告</button>
+            <button class="btn-next" onclick="closeApology()">接受道歉并进入报告</button>
         </div>
     </div>
 
-    <!-- 3. 报告阶段 -->
-    <div id="report-stage" class="stage hidden">
-        <div class="report-card animate__animated animate__fadeIn">
-            <div class="report-header">NEW YEAR REPORT · 2026</div>
-            
-            <div id="final-name" class="report-name">致我的朋友</div>
-            
-            <div id="final-body" class="report-body"></div>
-            
-            <div class="report-footer">
-                <p>—— 你的好友 谨启 ——</p>
-                <div style="font-size: 10px; opacity: 0.6; margin-top: 5px;">基于 2025 的珍贵回忆 实时生成</div>
-            </div>
-        </div>
-        <button class="btn-gold animate__animated animate__fadeInUp" style="margin-top: 30px;" onclick="location.reload()">回看开幕</button>
-    </div>
-
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script>
-        const config = {
-            "default": "致我所有闪闪发光的朋友们：\n\n新年快乐！🎆\n\n这一年，我们散落在不同的经纬度上——有人在书桌前攀登知识的峭壁，有人在实验室里解码未来的方程式，有人在复读的赛道上二次启航，也有人正探索着大学时光的无数可能。\n\n愿你们在属于自己的战场里，每份专注都落地生花，每次尝试都积蓄力量。愿笔尖流出的答案、键盘敲出的代码、调试通过的数据，都成为你们通往理想生活的密钥。\n\n更愿你们在奋斗的间隙，永远保有让自己快乐的能力。去吹风，去舞蹈，去看一场期待已久的演出；去大笑，去相遇，去收藏日常里微小的浪漫。愿你们眼角常有光，心头常柔软，在成为“厉害大人”的路上，也别忘了做那个“容易开心的小孩”。\n\n感谢你们又陪我走过了一程山水。新的一年，愿我们继续在各自的轨道上发光，也在彼此需要时随时亮起——就像星星分散在天幕，却始终共享着同一片银河。\n\n祝我的朋友们：前程有奔赴，生活有回甘，身边永远有清风与花开。\n\n2026，我们一起往前走吧！✨",
-            "messages": {
-                "任美伊": "嘿，新年快乐！ 🌟\n\n新的一年马上到啦，祝你像初升的朝阳一样闪闪发光，每一天都自信满满，做最明亮的自己！🎉\n\n过去的日子或许有些颠簸与曲折，但崭新的篇章已经打开。愿你把所有沉重的、烦心的都轻轻放下，像抖落肩上的雪花一样，转身迎接一片晴空。✨\n\n勇敢的闯过高考的难关，站在大学的全新的起点。2026年会是一个更轻盈、更自在的开始——愿你脚步轻快，笑容常在，眼里永远盛着对明天的期待。\n\n记得多为自己骄傲哦，比起精致的妆容，我觉得你的性格才是让你发光的魔法！🎈\n\n新年快乐，万事皆甜～",
-                "荆博暄": "嗨，新年快乐！ 🌸\n\n生活不止有眼前的PPT，还有诗和远方。\n\n新的一年，愿所有烦人的任务、压榨人的琐事，都像被一键删除的草稿一样——彻底清空！你值得被温柔以待，就像你总在别人低落时递上阳光那样。☀️\n\n特别想谢谢你，在我需要时给过的安慰和拥抱。你身上有种温暖又明亮的力量，能让周围的人都跟着轻松起来。2026年，愿这份力量更多回馈到你自己身上：少点熬夜赶工，多点从容微笑；少为别人的事操心，多让自己尽情绽放。\n\n新年的钟声会敲走所有疲惫，未来等着你的，一定是更轻盈、更敞亮的日子。毕竟，像你这样又美又飒又善解人意的女孩，运气当然要配得上你的努力！✨\n\n记得照顾好自己，你笑起来的样子才是最美的风景～\n新年快乐，万事顺意，自由如风！🎈",
-                "武蓉萱": "那些与小车反复调试的深夜，那些在比赛节点前精密计算的时刻——它们塑造了你理性而清晰的模样。使我永远记得你可靠的模样。\n\n新的一年，愿你的世界既有逻辑的优美，也有诗意的轻盈。愿电路接通灵感，代码书写从容，而你在现实与幻想之间，永远保有自己温柔的平衡。\n\n前路或许仍有需要攻坚的赛道，但你不必总是跑得太急。偶尔停下来，看看云，或者进入二游的箱庭——那里有另一场属于你的、不必赶时间的冒险。\n\n祝你，在新的一年里，调试顺利，灵感常驻，永远是自己宇宙里最清醒的建造者。",
-                "晋伊": "新年快乐呀！🎉\n\n给你送上2026年“特别定制版”祝福——祝你的代码像手势舞一样丝滑流畅，bug率比体重下降得还快！希望新一年你的终端里满是绿色的✅，生活里全是粉色的泡泡💕\n\n祝你的2026像完美部署的程序：该相遇的总会相遇，该运行的一路顺畅！愿你在明年的此刻不仅仅只是此刻姐姐与姐夫的“电灯泡”，也会在新的一年收获自己的甜蜜～\n\n记住哦，世界上最棒的算法就是：你的快乐+你的热爱+一点小幸运！2026，愿你的生活永远运行在“开心模式”，每天都有新成就，每个周末都有小惊喜！\n\n要一直做那个让代码跳舞、让日子发光的可爱女孩呀！💻💃\n新年快乐～",
-                "刘家易": "致正在穿越复读副本的你：\n\n新年快乐呀！🎇\n\n知道你现在正和试卷题库进行着“长期作战”，但别忘了——你可是那个能把《银魂》精神贯彻到现实的古灵精怪少女！愿你的笔像洞爷湖木刀一样，劈开所有难题；愿你的课桌比万事屋的委托板更承载热血与可能✨\n\n新的一年，愿你的异想天开永远比错题本厚，愿你的脑洞宇宙持续扩张到银河系外🌌！即使面对重复的日常，也请继续用奇思妙想给生活涂上粉色荧光笔——毕竟，这个世界需要像你这样“不按常理出牌”的耀眼存在💖\n\n偶尔累的时候，记得像银时一样躺平吃草莓牛奶，或者对着肌肉男海报振臂高呼“这就是青春！”——没什么比保持你的野生棱角更重要的了！\n\n2026，愿你的努力像JUMP漫画分镜一样逐帧兑现，愿你的目标在结局页被打上金光闪闪的“完胜”！\n\n等你从“复读战场”荣耀归来——未来的大学生活，一定会对你喊：“欢迎来到更酷的副本！”\n冲呀！！💪🍓",
-                "孙逸莹": "祝福给在西安的你：\n新年快乐！🏮\n\n从保定的校园走到西安的城墙下，距离改变了许多，但没改变你身上那种让人安心的力量。每当想起初中时你总能把杂乱的事情理顺，就特别感慨——你始终是那个值得信赖的女孩。\n\n长安的月色应该很美吧？愿新一年的你，在古老的城市里书写崭新的故事。少为未知焦虑，多在当下微笑；十三朝古都的砖瓦见证过无数风雨，而你的坚韧，也一定能被时光温柔以待。\n\n愿你的2026像西安的晨钟暮鼓——踏实而从容，既有历史的厚重，也有年轻的朝气。偶尔在忙碌的课业间隙，做个简单的女孩：去城墙上吹吹风，在巷子里找找美食，让烦恼像街角蒸腾的热气，渐渐飘散。\n\n你总是稳稳地走在自己的轨道上，但请记得：可靠如你，也完全有资格卸下担子，享受轻快的时光。\n\n新年快乐，我亲爱的老朋友！愿你在异乡的星空下，始终被温暖环绕，永远眉眼弯弯✨",
-                "陈奕伽": "给正在蓄力冲刺的你：\n新年快乐！✨\n\n知道此刻的你正埋头于书山题海，用每一支写完的笔芯标记着通往梦想的距离。\n\n你曾说想去南方，想去看大湾区的海与灯火。愿这个念头成为你卷子间隙抬头时，眼底最亮的那颗星。愿六月的答卷，终将兑现你所有的早读与深夜；愿九月的列车，真能载你抵达暖风铺面的海岸线。\n\n压力偶尔会像窗外的暮色一样压下来，但请记得：你从来不是独自在战斗。这十几年友情攒下的“能量包”，随时可以为你续航～累了就想想我们一起干的傻事，想想南方湿润的风和等着你的崭新故事。\n\n2026年，愿你的笔尖有光，心中有岸。愿每一次模拟考都成为向上的台阶，每一点努力都沉淀为底气。高考不过是人生其中一场探险，而你早已拥有闯关的勇气与灵动。\n\n等你六月凯旋，我们一定要好好庆祝，为你，也为这段闪着泪与笑的青春。\n加油，亲爱的老朋友！🌊\n\n你值得所有美好，包括正奔赴而来的、那片南方的海。",
-                "李晨昱": "给正在重新绘制蓝图的你：\n\n新年快乐呀！✨\n\n知道此刻的你正埋首在另一轮四季的耕耘里，用旧日的勇气体面地面对崭新的挑战。复读的时光像是写给未来的密信——每一笔落下都需要加倍的认真。\n\n你总是像小太阳一样温暖着身边的人，连带着把那些难解的题目都照得柔和了几分。新的一年，愿你在照顾世界的同时，更被世界温柔照料；愿你的勤奋与善良，都能兑换成六月最明亮的答案。\n\n压力偶尔会悄悄爬上肩头，但请记住：你从来不是孤身一人。那些你曾给予他人的理解与鼓励，现在正以更大的能量回流向你。如果累了，就忙里偷闲放松一下吧，或者在假期向我诉苦。\n\n2026年，愿你的课桌洒满笃定的光，愿你的笔记里藏着渐近的梦想。每一次提问都是向上的台阶，每一份耐心都在铺就更宽阔的路。\n\n请一定继续保持那份珍贵的天真与热忱——那是你最动人的底色，也是时光最想珍藏的模样。\n\n等到盛夏的风吹来好消息时，我一定会为你好好庆祝，为你这段用勇气重新雕刻的、闪闪发光的旅程。\n加油，我亲爱的朋友！🌟\n\n你值得所有美好，包括那个正在奔跑而来的、光明的未来。"
+        const friendData = {
+            "任美伊": {
+                keyword: "闪闪发光",
+                p2: "过去的日子或许有些颠簸与曲折，但崭新的篇章已经打开。你曾像初升的朝阳一样，即便有云层遮挡也依然试图散发光芒。那些沉重与烦心，终会像抖落肩上的雪花一样消散。",
+                p3: "2026年，愿你勇敢地闯过高考难关，站在大学的全新起点。祝你每一天都自信满满，笑容常在。愿你的脚步轻快，眼里永远盛着对明天的期待！",
+                p4: "记得多为自己骄傲哦。比起精致的妆容，我觉得你的性格才是让你发光的魔法！新年快乐，万事皆甜～"
+            },
+            "荆博暄": {
+                keyword: "温暖如风",
+                p2: "你总是在别人低落时递上阳光，那种温暖又明亮的力量，让周围的人都跟着轻松。生活不该只有忙碌的任务，那些压榨人的琐事，值得被一键删除清空。",
+                p3: "2026年，愿这份力量更多回馈到你自己。少点熬夜赶工，多点从容微笑；少为别人的事操心，多让自己尽情绽放。你这样优秀的女孩，运气一定要配得上你的努力！",
+                p4: "新年快乐，万事顺意！记得照顾好自己，你笑起来的样子，才是最美的风景。自由如风，万事胜意！"
+            },
+            "武蓉萱": {
+                keyword: "理性建造者",
+                p2: "那些与小车反复调试的深夜，那些精密计算的时刻，塑造了你理性而清晰的模样。在复杂的逻辑与电路间，你始终是那个最可靠的守护者。",
+                p3: "新的一年，愿你的世界既有逻辑的优美，也有诗意的轻盈。愿电路接通灵感，代码书写从容。不必总是跑得太急，偶尔也去二游的箱庭里进行一场不必赶时间的冒险。",
+                p4: "祝你，在新的一年里，调试顺利，灵感常驻。永远是你自己宇宙里最清醒、最温柔的建造者。"
+            },
+            "晋伊": {
+                keyword: "甜蜜算法",
+                p2: "过去的一年，你让代码跳舞，让日子发光。在算法与逻辑的世界里，你始终保持着那份可爱的纯真。不管是繁琐的程序还是生活的琐碎，你都处理得井井有条。",
+                p3: "祝你的 2026 像完美部署的程序：该相遇的总会相遇，该运行的一路顺畅！愿你不仅仅只是姐姐与姐夫的“电灯泡”，也会在新的一年收获属于自己的那份甜蜜泡泡。",
+                p4: "世界上最棒的算法就是：你的快乐+热爱+小幸运！愿你的生活永远运行在“开心模式”，每天都有新惊喜！"
+            },
+            "刘家易": {
+                keyword: "热血灵魂",
+                p2: "致正在穿越“复读副本”的你：你正像《银魂》里的主角一样，用那股“不按常理出牌”的精神进行着长期作战。即使面对重复的日常，你的异想天开也从未熄灭。",
+                p3: "2026年，愿你的笔像洞爷湖木刀一样劈开难题！愿你的努力像JUMP漫画分镜一样逐帧兑现，愿你的目标在结局页被打上金金闪闪的“完胜”！",
+                p4: "累了就喝杯草莓牛奶，或者对着肌肉男海报高呼青春！等你荣耀归来，未来的大学生活一定会喊：“欢迎来到更酷的副本！”"
+            },
+            "孙逸莹": {
+                keyword: "长安晨钟",
+                p2: "从保定到西安，距离改变了，但你身上那种让人安心的力量从未改变。不管是初中的杂乱事务还是现在的异乡生活，你始终稳稳地走在自己的轨道上。",
+                p3: "愿你的 2026 像西安的晨钟暮鼓——踏实而从容。愿你在古老的城市里书写崭新的故事，让烦恼像巷子里蒸腾的热气，渐渐飘散。你在异乡，也始终被温暖环绕。",
+                p4: "可靠如你，也完全有资格卸下担子。新年快乐，我亲爱的老朋友！愿你始终眉眼弯弯，万事皆好。"
+            },
+            "陈奕伽": {
+                keyword: "蓄力冲刺",
+                p2: "此刻的你正埋头于书山题海，用每一支笔芯标记通往梦想的距离。你曾说想去南方，想看大湾区的灯火，那颗星一直就在你卷子的间隙里闪烁。",
+                p3: "愿六月的答卷兑现所有的深夜，愿九月的列车载你抵达暖风扑面的海岸线。压力袭来时，记得这十几年的友情攒下的“能量包”，随时可以为你续航。",
+                p4: "加油，亲爱的老朋友！你值得所有美好，包括那片正奔赴而来的、南方的海。六月凯旋，我们好好庆祝！"
+            },
+            "李晨昱": {
+                keyword: "蓝图重绘",
+                p2: "此刻的你正用旧日的勇气体面地面对崭新的挑战。复读的时光是写给未来的密信，每一笔都带着加倍的认真。你像小太阳一样照亮别人，也请照亮你自己。",
+                p3: "2026年，愿你的课桌洒满笃定的光，愿你的勤奋兑换成最明亮的答案。那些你给予他人的温暖，正以更大的能量回流向你。请继续保持那份珍贵的天真与热忱。",
+                p4: "等到盛夏的风吹来好消息，我一定会为你欢呼。加油，亲爱的！你值得那个奔跑而来的、光明的未来。"
+            },
+            "default": {
+                keyword: "共同银河",
+                p2: "这一年，我们散落在不同的经纬度上——有人在书桌前攀登，有人在实验室解码，有人在赛道上启航。我们各自作战，却又在某种频率上始终共鸣。",
+                p3: "2026年，愿我们在属于自己的战场里落地生花。愿笔尖流出的答案、键盘敲出的代码，都成为通往理想生活的密钥。愿我们在奋斗的间隙，永远保有让自己快乐的能力。",
+                p4: "感谢你们又陪我走过一程山水。新的一年，愿我们继续在各自的轨道上发光。前程有奔赴，生活有回甘！"
             }
         };
 
-        // --- 核心逻辑 ---
         const urlParams = new URLSearchParams(window.location.search);
-        const friendName = urlParams.get('to');
+        const name = urlParams.get('to');
+        const data = friendData[name] || friendData["default"];
 
-        // 初始化倒计时
-        function updateTimer() {
-            const diff = new Date('2026/01/01 00:00:00') - new Date();
-            if (diff <= 0) { document.getElementById('countdown').innerHTML = "HAPPY NEW YEAR 2026"; return; }
-            const h = Math.floor(diff/3600000), m = Math.floor((diff%3600000)/60000), s = Math.floor((diff%60000)/1000);
-            document.getElementById('countdown').innerHTML = `REMAINING: ${h}H ${m}M ${s}S`;
+        // 初始化内容
+        document.getElementById('user-name').innerText = name || "朋友们";
+        document.getElementById('user-keyword').innerText = data.keyword;
+        document.getElementById('p2-text').innerText = data.p2;
+        document.getElementById('p3-text').innerText = data.p3;
+        document.getElementById('p4-text').innerText = data.p4;
+
+        // 刘家易特殊处理
+        if (name === "刘家易") {
+            document.getElementById('apology-overlay').style.display = 'flex';
         }
-        setInterval(updateTimer, 1000); updateTimer();
 
-        // 步骤控制
-        function nextStep() {
-            if (friendName === "刘家易") {
-                switchStage('cover-stage', 'apology-stage');
-            } else {
-                showReport();
+        function closeApology() {
+            document.getElementById('apology-overlay').classList.add('animate__animated', 'animate__fadeOut');
+            setTimeout(() => { document.getElementById('apology-overlay').style.display = 'none'; }, 500);
+        }
+
+        // 翻页逻辑
+        let currentPage = 0;
+        const totalPages = 4;
+        function scrollPage(step) {
+            currentPage = step;
+            const container = document.getElementById('pages-container');
+            container.style.transform = `translateY(-${currentPage * 100}%)`;
+            document.getElementById('p-bar').style.width = `${(currentPage / (totalPages-1)) * 100}%`;
+            
+            // 最后一页放烟花
+            if (currentPage === 3) {
+                setInterval(autoFire, 2000);
             }
         }
 
-        function switchStage(from, to) {
-            document.getElementById(from).classList.add('hidden');
-            const toNode = document.getElementById(to);
-            toNode.classList.remove('hidden');
-            toNode.classList.add('animate__animated', 'animate__fadeIn');
+        // 烟花逻辑
+        function autoFire() {
+            confetti({ particleCount: 30, spread: 70, origin: { x: Math.random(), y: Math.random() - 0.2 }, colors: ['#ffcc00', '#ff0000'] });
         }
 
-        function showReport() {
-            const from = document.getElementById('apology-stage').classList.contains('hidden') ? 'cover-stage' : 'apology-stage';
-            switchStage(from, 'report-stage');
-            
-            const nameEl = document.getElementById('final-name');
-            nameEl.innerText = friendName ? `致：${friendName}` : "致：所有闪闪发光的朋友们";
-            
-            setTimeout(startTyping, 1000);
-        }
-
-        function startTyping() {
-            const text = config.messages[friendName] || config.default;
-            const container = document.getElementById('final-body');
-            let i = 0;
-            const timer = setInterval(() => {
-                if (i < text.length) {
-                    container.innerText += text.charAt(i);
-                    i++;
-                    container.scrollTop = container.scrollHeight;
-                } else {
-                    clearInterval(timer);
-                    setInterval(() => createFirework({clientX: Math.random()*window.innerWidth, clientY: Math.random()*window.innerHeight}), 2500);
-                }
-            }, 40);
-        }
-
-        // --- 视觉特效：粒子系统 ---
-        const canvas = document.getElementById('particle-canvas');
-        const ctx = canvas.getContext('2d');
-        let particles = [];
-        function initCanvas() {
-            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-            particles = Array.from({length: 40}, () => ({
-                x: Math.random() * canvas.width, y: Math.random() * canvas.height,
-                r: Math.random() * 2 + 1, d: Math.random() * 0.5 + 0.2
-            }));
-        }
-        function drawParticles() {
-            ctx.clearRect(0,0,canvas.width,canvas.height);
-            ctx.fillStyle = "rgba(255, 204, 0, 0.5)";
-            particles.forEach(p => {
-                ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill();
-                p.y += p.d; if(p.y > canvas.height) p.y = -10;
-            });
-            requestAnimationFrame(drawParticles);
-        }
-        window.addEventListener('resize', initCanvas);
-        initCanvas(); drawParticles();
-
-        function createFirework(e) {
-            confetti({
-                particleCount: 20, spread: 50,
-                origin: { x: e.clientX / window.innerWidth, y: e.clientY / window.innerHeight },
-                colors: ['#ffcc00', '#ffffff', '#ff4d4d']
-            });
-        }
+        window.onclick = (e) => {
+            confetti({ particleCount: 15, spread: 50, origin: { x: e.clientX/window.innerWidth, y: e.clientY/window.innerHeight }, colors: ['#ffcc00', '#ffffff'] });
+        };
     </script>
 </body>
 </html>
