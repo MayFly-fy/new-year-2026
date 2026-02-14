@@ -3,202 +3,189 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>2026 龙马精神 · 年度报告</title>
+    <title>2026 龙马精神 · 年度总结报告</title>
+    <!-- 引入动画库 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root {
             --gold: #ffcc00;
-            --red: #d40000;
-            --dark: #800000;
+            --bili-blue: #00a1d6;
+            --new-year-red: #d40000;
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; color: #fff7d1; font-family: "PingFang SC", "Microsoft YaHei", sans-serif; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; color: #fff; font-family: "PingFang SC", sans-serif; }
 
-        /* 背景：马年红绸感 */
-        .bg { position: fixed; width: 100%; height: 100%; background: radial-gradient(circle at center, #d40000 0%, #600000 100%); z-index: -1; }
-        .bg-pattern { position: fixed; width: 100%; height: 100%; background-image: url('https://www.transparenttextures.com/patterns/pinstriped-suit.png'); opacity: 0.15; z-index: -1; }
+        /* 背景：深邃星空渐变红 */
+        .universe {
+            position: fixed; width: 100%; height: 100%;
+            background: radial-gradient(circle at top, #3b0000 0%, #1a0000 100%);
+            z-index: -2;
+        }
+        #star-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.6; }
 
-        /* 翻页容器 */
-        .container { position: relative; width: 100%; height: 100%; transition: transform 0.7s cubic-bezier(0.65, 0, 0.35, 1); }
-        .page { position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 25px; flex-shrink: 0; }
+        /* 全屏页面容器 */
+        .wrapper { width: 100%; height: 100%; transition: transform 0.8s cubic-bezier(0.645, 0.045, 0.355, 1); }
+        .screen { 
+            position: relative; width: 100%; height: 100%; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 40px 30px; overflow: hidden;
+        }
 
-        /* 通用卡片 */
-        .card { background: rgba(0, 0, 0, 0.35); backdrop-filter: blur(15px); border: 1.5px solid rgba(255, 204, 0, 0.3); border-radius: 24px; padding: 25px 20px; width: 100%; max-width: 360px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); text-align: center; }
+        /* 统一卡片样式 */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 30px;
+            padding: 35px 25px;
+            width: 100%; max-width: 360px;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
 
-        /* Page 1: 揭晓设计 */
-        .horse-icon { font-size: 60px; margin-bottom: 20px; filter: drop-shadow(0 0 10px var(--gold)); }
-        #keyword-display { font-size: 32px; font-weight: bold; color: var(--gold); margin: 20px 0; opacity: 0; transform: scale(0.5); transition: all 0.5s ease; border: 2px solid var(--gold); padding: 10px; display: inline-block; border-radius: 8px; }
-        .reveal-btn { background: linear-gradient(135deg, var(--gold), #fff7d1); color: var(--dark); border: none; padding: 15px 40px; border-radius: 50px; font-weight: 900; cursor: pointer; animation: pulse 2s infinite; }
+        /* 元素动画先后顺序 */
+        .delay-1 { animation-delay: 0.3s; }
+        .delay-2 { animation-delay: 0.6s; }
+        .delay-3 { animation-delay: 0.9s; }
 
-        /* Page 2: 图片与回忆 */
-        .photo-frame { width: 180px; height: 180px; border: 4px solid var(--gold); border-radius: 50%; overflow: hidden; margin: 0 auto 20px; box-shadow: 0 0 20px var(--gold); background: #333; }
-        .photo-frame img { width: 100%; height: 100%; object-fit: cover; }
-        .chapter-title { font-size: 14px; color: var(--gold); letter-spacing: 4px; border-bottom: 1px solid var(--gold); display: inline-block; margin-bottom: 15px; }
+        /* Page 1 特效 */
+        .reveal-circle {
+            width: 160px; height: 160px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--gold), #fff);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 80px; color: var(--new-year-red); cursor: pointer;
+            box-shadow: 0 0 40px rgba(255, 204, 0, 0.4);
+            position: relative; z-index: 10;
+        }
+        #keyword-tag {
+            font-size: 38px; color: var(--gold); font-weight: bold;
+            margin: 30px 0; display: none; text-shadow: 0 0 15px var(--gold);
+        }
 
-        /* Page 4: 福袋拉绳交互 */
-        .fudai-container { position: relative; width: 200px; height: 250px; cursor: pointer; }
-        .fudai { width: 100%; height: 100%; background: #c00; border-radius: 40% 40% 50% 50%; border: 3px solid var(--gold); position: relative; display: flex; align-items: center; justify-content: center; font-size: 80px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .fudai-top { position: absolute; top: -10px; width: 110%; height: 40px; background: #c00; border-radius: 50%; border: 3px solid var(--gold); z-index: 2; }
-        .rope { width: 4px; height: 80px; background: var(--gold); margin: 0 auto; position: relative; transition: height 0.3s; }
-        .rope-handle { width: 20px; height: 20px; background: var(--gold); border-radius: 50%; position: absolute; bottom: -10px; left: -8px; box-shadow: 0 0 10px var(--gold); }
-        
-        /* 进场动画 */
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
-        .show-kw { opacity: 1 !important; transform: scale(1.2) rotate(-5deg) !important; }
+        /* Page 2 图片 */
+        .photo-box {
+            width: 200px; height: 200px; margin: 0 auto 25px;
+            border: 3px solid var(--gold); border-radius: 20px;
+            overflow: hidden; transform: rotate(-3deg);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .photo-box img { width: 100%; height: 100%; object-fit: cover; }
 
-        /* 底部导航按钮 */
-        .nav-btn { background: var(--gold); color: var(--dark); border: none; padding: 12px 30px; border-radius: 30px; font-weight: bold; margin-top: 20px; cursor: pointer; }
+        /* Page 4 福袋拉绳 */
+        .fudai-wrapper { position: relative; width: 180px; height: 220px; margin-top: 20px; }
+        .fudai-bag { width: 100%; height: 100%; background: #c00; border-radius: 40% 40% 50% 50%; border: 3px solid var(--gold); position: relative; font-size: 80px; display: flex; align-items: center; justify-content: center; color: var(--gold); z-index: 2; }
+        .pull-rope {
+            position: absolute; bottom: -60px; left: 50%; width: 4px; height: 80px;
+            background: var(--gold); transform: translateX(-50%);
+            cursor: pointer; transition: height 0.3s;
+        }
+        .pull-rope::after { content: ""; position: absolute; bottom: -10px; left: -10px; width: 24px; height: 24px; background: var(--gold); border-radius: 50%; }
+
+        /* 按钮样式 */
+        .bili-btn {
+            background: var(--gold); color: #000; border: none;
+            padding: 14px 40px; border-radius: 50px; font-weight: bold;
+            font-size: 16px; cursor: pointer; margin-top: 30px;
+            transition: all 0.3s;
+        }
+        .bili-btn:active { transform: scale(0.9); }
 
         /* 道歉弹窗 */
-        #apology-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px; }
+        #apology-stage {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 2000; display: none; align-items: center; justify-content: center;
+        }
     </style>
 </head>
 <body>
 
-    <div class="bg"></div>
-    <div class="bg-pattern"></div>
+    <div class="universe"></div>
+    <canvas id="star-canvas"></canvas>
 
-    <div id="pages-container" class="container">
+    <div id="main-wrapper" class="wrapper">
         
         <!-- Page 1: 封面揭晓 -->
-        <section class="page">
-            <div class="horse-icon">🐎</div>
-            <div style="font-size: 16px; letter-spacing: 5px; color: var(--gold);">2026 龙马精神</div>
-            <h2 id="user-display-name" style="font-size: 40px; margin: 15px 0;">你好</h2>
+        <section class="screen">
+            <div class="animate__animated animate__fadeInDown delay-1" style="font-size: 14px; letter-spacing: 5px; opacity: 0.6; margin-bottom: 10px;">2026 年度总结报告</div>
+            <h1 id="user-title" class="animate__animated animate__fadeIn delay-2" style="font-size: 36px; margin: 0 0 40px;">你好，朋友</h1>
             
-            <div id="keyword-display">???</div>
-            
-            <div id="reveal-area">
-                <button class="reveal-btn" onclick="revealKeyword()">揭晓我的年度关键词</button>
+            <div id="keyword-tag" class="animate__animated animate__zoomIn">闪闪发光</div>
+
+            <div id="reveal-btn-area" class="animate__animated animate__zoomIn delay-3">
+                <div class="reveal-circle" onclick="doReveal()">福</div>
+                <p style="color: var(--gold); margin-top: 20px; letter-spacing: 2px;">点击揭晓年度关键词</p>
             </div>
-            
-            <button id="p1-next" class="nav-btn" style="display:none;" onclick="scrollPage(1)">进入我的年度报告</button>
+
+            <button id="p1-next" class="bili-btn" style="display:none;" onclick="goPage(1)">开启连接</button>
         </section>
 
-        <!-- Page 2: 与我的年度回忆 -->
-        <section class="page">
-            <div class="card">
-                <div class="photo-frame">
-                    <img id="user-photo" src="" alt="" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=horse'">
+        <!-- Page 2: 年度回忆 -->
+        <section class="screen">
+            <div class="glass-card">
+                <div class="animate__animated animate__fadeInDown" style="font-size: 12px; letter-spacing: 3px; color: var(--gold); margin-bottom: 20px;">CHAPTER 01 · 与我的回忆</div>
+                <div class="photo-box animate__animated animate__zoomIn delay-1">
+                    <img id="user-photo" src="" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=horse'">
                 </div>
-                <div class="chapter-title">MEMORIES · 年度回忆</div>
-                <h3 id="p2-title" style="color: var(--gold); margin: 10px 0;"></h3>
-                <p id="p2-text" style="font-size: 16px; text-align: justify;"></p>
-                <button class="nav-btn" onclick="scrollPage(2)">下一步：未来展望</button>
+                <h2 id="p2-title" class="animate__animated animate__fadeInUp delay-2" style="font-size: 22px; color: var(--gold); margin: 0 0 15px;">年度回忆</h2>
+                <p id="p2-text" class="animate__animated animate__fadeInUp delay-3" style="font-size: 15px; line-height: 1.8; text-align: justify; opacity: 0.9;"></p>
+                <button class="bili-btn" onclick="goPage(2)">下一步</button>
             </div>
         </section>
 
         <!-- Page 3: 未来展望 -->
-        <section class="page">
-            <div class="card">
-                <div class="horse-icon" style="font-size: 40px;">✨</div>
-                <div class="chapter-title">VISION · 未来展望</div>
-                <h3 style="color: var(--gold); margin: 15px 0;">2026 纵马前行</h3>
-                <p id="p3-text" style="font-size: 17px; line-height: 1.9;"></p>
-                <button class="nav-btn" onclick="scrollPage(3)">最后：抽取福袋</button>
+        <section class="screen">
+            <div class="glass-card">
+                <div class="animate__animated animate__fadeInDown" style="font-size: 12px; letter-spacing: 3px; color: var(--gold); margin-bottom: 20px;">CHAPTER 02 · 纵马前行</div>
+                <div style="font-size: 50px; margin-bottom: 20px;">🐎</div>
+                <h2 class="animate__animated animate__fadeInUp delay-1" style="font-size: 22px; color: var(--gold); margin: 0 0 15px;">2026 未来愿景</h2>
+                <p id="p3-text" class="animate__animated animate__fadeInUp delay-2" style="font-size: 16px; line-height: 2; text-align: justify;"></p>
+                <button class="bili-btn" onclick="goPage(3)">查看寄语</button>
             </div>
         </section>
 
-        <!-- Page 4: 福袋寄语 -->
-        <section class="page">
-            <h2 style="color:var(--gold); margin-bottom: 30px;">拉动绳子，开启福气</h2>
+        <!-- Page 4: 福袋尾声 -->
+        <section class="screen">
+            <h2 class="animate__animated animate__fadeInDown" style="color: var(--gold); letter-spacing: 2px; margin-bottom: 40px;">拉动绳子，开启2026福气</h2>
             
-            <div class="fudai-container" onclick="popFudai()">
-                <div class="fudai-top"></div>
-                <div class="fudai">福</div>
-                <div class="rope" id="rope">
-                    <div class="rope-handle"></div>
-                </div>
+            <div class="fudai-wrapper" onclick="openFudai()">
+                <div class="fudai-bag">福</div>
+                <div id="rope" class="pull-rope"></div>
             </div>
 
-            <div id="final-wish" class="animate__animated" style="display:none; text-align:center; margin-top: 30px;">
-                <p id="p4-text" style="background: rgba(255,204,0,0.2); padding: 15px; border-radius: 10px; border: 1px solid var(--gold);"></p>
-                <button class="nav-btn" onclick="location.reload()" style="background:transparent; color:var(--gold); border:1px solid var(--gold); margin-top:20px;">重新观看</button>
+            <div id="final-card" class="glass-card" style="display:none; margin-top: 30px;">
+                <p id="p4-text" style="font-size: 16px; line-height: 1.8;"></p>
+                <button class="bili-btn" style="background:none; border:1px solid var(--gold); color:var(--gold);" onclick="location.reload()">重新开启</button>
             </div>
         </section>
-
     </div>
 
-    <!-- 刘家易道歉弹窗 -->
-    <div id="apology-overlay">
-        <div class="card animate__animated animate__bounceIn">
-            <h2 style="color: var(--gold);">🙇‍♀️ 特别更正声明</h2>
-            <p style="margin: 20px 0;">
-                系统检测到刚才在输入名字时发生了严重偏移！<br><br>
-                <span style="font-size: 24px; color: #fff; border-bottom: 2px solid var(--gold);">刘家易</span><br><br>
-                对不起，家易！我不小心打错了你的名字。<br>请接受这匹快马送来的歉意~
+    <!-- 道歉关卡 -->
+    <div id="apology-stage">
+        <div class="glass-card animate__animated animate__zoomIn" style="border-color: #ff4d4d;">
+            <div style="font-size: 50px;">⚠️</div>
+            <h2 style="color: #ff4d4d; margin: 20px 0;">系统信息更正</h2>
+            <p style="line-height: 1.8;">
+                抱歉，<b>刘家易</b>！<br>
+                由于我的输入Bug，刚才把你的名字打错了。<br>
+                已重新校准数据，请点击下方进入你的专属报告。
             </p>
-            <button class="nav-btn" onclick="closeApology()">接受道歉并进入报告</button>
+            <button class="bili-btn" style="background:#ff4d4d;" onclick="closeApology()">接受道歉并进入</button>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script>
         const friendData = {
-            "任美伊": {
-                keyword: "熠熠生辉",
-                p2Title: "自信发光的魔法",
-                p2: "过去这一年，你像初升的朝阳一样闪闪发光。即使有过颠簸，你依然选择做最明亮的自己。那种不被雪花压垮的坚韧，真的很有感染力！",
-                p3: "2026愿你勇敢闯过高考关卡，站在大学的新起点。愿你脚步轻快，笑容常在，眼里永远盛着对明天的期待。万事皆甜，勇往直前！",
-                p4: "新年快乐！新的一年也要多为自己骄傲哦，你本身就是魔法！"
-            },
-            "荆博暄": {
-                keyword: "煦色韶光",
-                p2Title: "温柔明亮的力量",
-                p2: "生活不止PPT，还有你递给别人的拥抱。这一年，你身上那种温暖的力量，让周围的人都跟着轻松起来。你值得被这个世界温柔以待。",
-                p3: "2026愿这份力量回馈到你身上。少点熬夜，多点从容；少操心别人，多绽放自己。像你这样又美又飒的女孩，好运一定会准时到达！",
-                p4: "新年快乐！愿你万事顺意，自由如风，继续做最美的风景！"
-            },
-            "武蓉萱": {
-                keyword: "灵感极客",
-                p2Title: "理性与诗意的平衡",
-                p2: "那些与小车反复调试的深夜，塑造了你理性可靠的模样。在复杂的逻辑里，你总能找到通向成功的代码，这种从容让人佩服。",
-                p3: "2026愿电路接通灵感，愿世界既有逻辑的优美，也有诗意的轻盈。不必总是跑得太急，偶尔也去二游的世界里享受一场不必赶时间的冒险。",
-                p4: "祝你调试顺利，灵感常驻。做自己宇宙里最清醒的建造者！"
-            },
-            "晋伊": {
-                keyword: "绿码锦鲤",
-                p2Title: "让代码跳舞的女孩",
-                p2: "过去的一年，你让代码变得丝滑，让日子变得发光。那种让生活随时运行在“开心模式”的能力，是你最棒的算法。",
-                p3: "2026祝你的Bug率比体重下降得还快！愿你的终端满是绿色的勾，生活里全是粉色的泡泡。早日收获属于自己的甜蜜~",
-                p4: "新春快乐！要一直做那个可爱、灵动、让日子发光的女孩呀！"
-            },
-            "刘家易": {
-                keyword: "完胜战神",
-                p2Title: "复读副本的闯关者",
-                p2: "现在的你正和题库进行着“长期作战”，就像《银魂》里的精神一样，即使日子重复，你的异想天开也从未熄灭。这正是你最耀眼的地方。",
-                p3: "2026愿你的努力像JUMP分镜一样逐帧兑现，愿你的目标被打上金色的“完胜”！等你荣耀归来，大学生活正等着你这个超酷的副本。",
-                p4: "冲呀！累了就喝草莓牛奶。愿你笔尖有光，结局圆满！"
-            },
-            "孙逸莹": {
-                keyword: "长安静好",
-                p2Title: "跨越千里的坚韧",
-                p2: "从保定到西安，你的坚韧一如既往。在古老的城墙下，你始终稳稳地走在自己的轨道上，那种让人安心的力量，从未改变。",
-                p3: "2026愿你在西安书写崭新的故事，愿你的生活像晨钟暮鼓般从容。少为未知焦虑，多在当下微笑。你在异乡，也始终被温暖环绕。",
-                p4: "新年快乐！可靠如你，也请记得偶尔卸下担子，享受轻快时光。"
-            },
-            "陈奕伽": {
-                keyword: "向南而生",
-                p2Title: "逐梦海岸的旅人",
-                p2: "这一年，你用写完的笔芯标记梦想的距离。你眼底闪烁的南方灯火，终会照进现实。压力虽大，但你从来不是独自战斗。",
-                p3: "2026愿六月的答卷兑现所有汗水，愿九月的列车带你抵达那片向往已久的海。愿你笔尖有光，心中有岸，凯旋而归！",
-                p4: "新年快乐，亲爱的老朋友！你值得那片南方的海，冲鸭！"
-            },
-            "李晨昱": {
-                keyword: "晨曦破晓",
-                p2Title: "重绘蓝图的勇气",
-                p2: "复读的时光是写给未来的密信。这一年你用旧日的勇气体面地面对挑战，像小太阳一样温暖别人，也请记得照亮你自己。",
-                p3: "2026愿你的课桌洒满笃定的光，愿你的勤奋兑换成最明亮的答案。请继续保持那份珍贵的天真，时光会珍藏你的模样。",
-                p4: "新年快乐！等到盛夏风起，我一定会为你庆祝这段闪光的旅程！"
-            },
-            "default": {
-                keyword: "龙马精神",
-                p2Title: "我们的2025",
-                p2: "这一年，我们散落在不同的经纬度，各自为了理想攀登。感谢在这一程山水里，我们依然是彼此的支柱与银河。",
-                p3: "2026愿我们在各自的轨道上发光，前程有奔赴，生活有回甘。愿笔尖与键盘，都能敲开通往理想生活的密钥。",
-                p4: "新的一年，我们继续一起走吧！万事如意，岁岁平安！"
-            }
+            "任美伊": { keyword: "熠熠生辉", p2Title: "自信发光的魔法", p2: "过去这一年，你像初升的朝阳一样闪闪发光。即使有过颠簸，你依然选择做最明亮的自己。那种不被雪花压垮的坚韧，真的很有感染力！", p3: "2026愿你勇敢闯过高考关卡，站在大学的新起点。愿你脚步轻快，笑容常在，眼里永远盛着对明天的期待。万事皆甜，勇往直前！", p4: "新年快乐！新的一年也要多为自己骄傲哦，你本身就是魔法！" },
+            "荆博暄": { keyword: "煦色韶光", p2Title: "温柔明亮的力量", p2: "生活不止PPT，还有你递给别人的拥抱。这一年，你身上那种温暖的力量，让周围的人都跟着轻松起来。你值得被这个世界温柔以待。", p3: "2026愿这份力量回馈到你身上。少点熬夜，多点从容；少操心别人，多绽放自己。像你这样又美又飒的女孩，好运一定会准时到达！", p4: "新年快乐！愿你万事顺意，自由如风，继续做最美的风景！" },
+            "武蓉萱": { keyword: "灵感极客", p2Title: "理性与诗意的平衡", p2: "那些与小车反复调试的深夜，塑造了你理性可靠的模样。在复杂的逻辑里，你总能找到通向成功的代码，这种从容让人佩服。", p3: "2026愿电路接通灵感，愿世界既有逻辑的优美，也有诗意的轻盈。不必总是跑得太急，偶尔也去二游的世界里享受一场不必赶时间的冒险。", p4: "祝你调试顺利，灵感常驻。做自己宇宙里最清醒的建造者！" },
+            "晋伊": { keyword: "绿码锦鲤", p2Title: "让代码跳舞的女孩", p2: "过去的一年，你让代码变得丝滑，让日子变得发光。那种让生活随时运行在“开心模式”的能力，是你最棒的算法。", p3: "2026祝你的Bug率比体重下降得还快！愿你的终端满是绿色的勾，生活里全是粉色的泡泡。早日收获属于自己的甜蜜~", p4: "新春快乐！要一直做那个可爱、灵动、让日子发光的女孩呀！" },
+            "刘家易": { keyword: "完胜战神", p2Title: "复读副本闯关者", p2: "现在的你正和题库进行着“长期作战”，就像《银魂》里的精神一样，即使日子重复，你的异想天开也从未熄灭。这正是你最耀眼的地方。", p3: "2026愿你的努力像JUMP分镜一样逐帧兑现，愿你的目标被打上金色的“完胜”！等你荣耀归来，大学生活正等着你这个超酷的副本。", p4: "冲呀！累了就喝草莓牛奶。愿你笔尖有光，结局圆满！" },
+            "孙逸莹": { keyword: "长安静好", p2Title: "跨越千里的坚韧", p2: "从保定到西安，你的坚韧一如既往。在古老的城墙下，你始终稳稳地走在自己的轨道上，那种让人安心的力量，从未改变。", p3: "2026愿你在西安书写崭新的故事，愿你的生活像晨钟暮鼓般从容。少为未知焦虑，多在当下微笑。你在异乡，也始终被温暖环绕。", p4: "新年快乐！可靠如你，也请记得偶尔卸下担子，享受轻快时光。" },
+            "陈奕伽": { keyword: "向南而生", p2Title: "逐梦海岸的旅人", p2: "这一年，你用写完的笔芯标记梦想的距离。你眼底闪烁的南方灯火，终会照进现实。压力虽大，但你从来不是独自战斗。", p3: "2026愿六月的答卷兑现所有汗水，愿九月的列车带你抵达那片向往已久的海。愿你笔尖有光，心中有岸，凯旋而归！", p4: "新年快乐，亲爱的老朋友！你值得那片南方的海，冲鸭！" },
+            "李晨昱": { keyword: "晨曦破晓", p2Title: "重绘蓝图的勇气", p2: "复读的时光是写给未来的密信。这一年你用旧日的勇气体面地面对挑战，像小太阳一样温暖别人，也请记得照亮你自己。", p3: "2026愿你的课桌洒满笃定的光，愿你的勤奋兑换成最明亮的答案。请继续保持那份珍贵的天真，时光会珍藏你的模样。", p4: "新年快乐！等到盛夏风起，我一定会为你庆祝这段闪光的旅程！" },
+            "default": { keyword: "龙马精神", p2Title: "共同的2025", p2: "这一年，我们散落在不同的经纬度，各自为了理想攀登。感谢在这一程山水里，我们依然是彼此的支柱与银河。", p3: "2026愿我们在各自的轨道上发光，前程有奔赴，生活有回甘。愿笔尖与键盘，都能敲开通往理想生活的密钥。", p4: "新的一年，我们继续一起走吧！万事如意，岁岁平安！" }
         };
 
         const urlParams = new URLSearchParams(window.location.search);
@@ -206,63 +193,65 @@
         const data = friendData[name] || friendData["default"];
 
         // 初始化内容
-        document.getElementById('user-display-name').innerText = name || "我的朋友";
-        document.getElementById('keyword-display').innerText = data.keyword;
+        document.getElementById('user-title').innerText = name ? `你好，${name}` : "你好，朋友";
+        document.getElementById('keyword-tag').innerText = data.keyword;
         document.getElementById('p2-title').innerText = data.p2Title;
         document.getElementById('p2-text').innerText = data.p2;
         document.getElementById('p3-text').innerText = data.p3;
         document.getElementById('p4-text').innerText = data.p4;
-        
-        // 设置图片路径，如果没有请确保文件名匹配
-        if(name) {
-            document.getElementById('user-photo').src = `${name}.jpg`; 
-        }
+        if(name) document.getElementById('user-photo').src = `${name}.jpg`;
 
         // 处理刘家易
-        if (name === "刘家易") {
-            document.getElementById('apology-overlay').style.display = 'flex';
-        }
-
+        if (name === "刘家易") document.getElementById('apology-stage').style.display = 'flex';
         function closeApology() {
-            document.getElementById('apology-overlay').classList.add('animate__animated', 'animate__fadeOut');
-            setTimeout(() => { document.getElementById('apology-overlay').style.display = 'none'; }, 500);
+            document.getElementById('apology-stage').classList.add('animate__animated', 'animate__fadeOut');
+            setTimeout(() => { document.getElementById('apology-stage').style.display = 'none'; }, 500);
         }
 
-        // 揭晓逻辑
-        function revealKeyword() {
-            document.getElementById('keyword-display').classList.add('show-kw');
-            document.getElementById('reveal-area').style.display = 'none';
+        // 揭晓
+        function doReveal() {
+            document.getElementById('keyword-tag').style.display = 'block';
+            document.getElementById('reveal-btn-area').style.display = 'none';
             document.getElementById('p1-next').style.display = 'inline-block';
-            confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#ffcc00', '#ff0000'] });
+            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#ffcc00', '#ff0000', '#00a1d6'] });
         }
 
-        // 翻页逻辑
-        let currentPage = 0;
-        function scrollPage(step) {
-            currentPage = step;
-            document.getElementById('pages-container').style.transform = `translateY(-${currentPage * 100}%)`;
+        // 翻页
+        function goPage(index) {
+            document.getElementById('main-wrapper').style.transform = `translateY(-${index * 100}%)`;
         }
 
-        // 福袋交互
-        let popped = false;
-        function popFudai() {
-            if(popped) return;
-            popped = true;
-            
-            // 拉绳动画
-            document.getElementById('rope').style.height = '120px';
-            
+        // 福袋
+        let opened = false;
+        function openFudai() {
+            if(opened) return;
+            opened = true;
+            document.getElementById('rope').style.height = '140px';
             setTimeout(() => {
-                confetti({
-                    particleCount: 200,
-                    spread: 100,
-                    origin: { y: 0.6 },
-                    colors: ['#ffcc00', '#ff0000', '#ffffff', '#ffebad']
-                });
-                document.getElementById('final-wish').style.display = 'block';
-                document.getElementById('final-wish').classList.add('animate__animated', 'animate__bounceIn');
-            }, 300);
+                confetti({ particleCount: 200, spread: 100, origin: { y: 0.8 }, colors: ['#ffcc00', '#ff0000', '#ffffff'] });
+                document.getElementById('final-card').style.display = 'block';
+                document.getElementById('final-card').classList.add('animate__animated', 'animate__backInUp');
+            }, 400);
         }
+
+        // 星空画布
+        const canvas = document.getElementById('star-canvas');
+        const ctx = canvas.getContext('2d');
+        let stars = [];
+        function initStars() {
+            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+            stars = Array.from({length: 80}, () => ({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, r: Math.random()*1.5, o: Math.random(), s: Math.random()*0.02 }));
+        }
+        function animateStars() {
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            stars.forEach(s => {
+                s.o += s.s; if(s.o > 1 || s.o < 0) s.s = -s.s;
+                ctx.fillStyle = `rgba(255,255,255,${s.o})`;
+                ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI*2); ctx.fill();
+            });
+            requestAnimationFrame(animateStars);
+        }
+        window.onresize = initStars; initStars(); animateStars();
     </script>
 </body>
 </html>
