@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>2026 龙马精神 · 交互总结报告</title>
+    <title>2026 龙马精神 · 年度报告</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <style>
         :root { --gold: #ffcc00; --red: #d40000; --win-blue: #000080; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; color: #fff; font-family: "Microsoft YaHei", sans-serif; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; color: #fff; font-family: "PingFang SC", "Microsoft YaHei", sans-serif; }
 
         canvas#main-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
 
@@ -23,24 +23,24 @@
         .glass-card { background: rgba(20, 20, 20, 0.7); backdrop-filter: blur(15px); border: 1.5px solid var(--gold); border-radius: 25px; padding: 25px; width: 100%; max-width: 360px; box-shadow: 0 15px 40px rgba(0,0,0,0.8); }
         .photo-frame { width: 150px; height: 150px; margin: 0 auto 15px; border: 3px solid var(--gold); border-radius: 50%; overflow: hidden; box-shadow: 0 0 20px var(--gold); }
 
-        /* 1. 福袋交互区 */
+        /* 福袋交互区 */
         .fudai-box { position: relative; width: 240px; height: 300px; cursor: pointer; margin-top: 10px; }
         .fudai-img { width: 100%; height: 100%; object-fit: contain; z-index: 5; position: relative; }
         .rope-box { position: absolute; bottom: 30px; left: 125px; width: 4px; height: 90px; background: linear-gradient(to bottom, transparent, var(--gold)); transition: height 0.3s; z-index: 2; }
         .rope-end { width: 20px; height: 20px; background: var(--gold); border-radius: 50%; position: absolute; bottom: -10px; left: -8px; box-shadow: 0 0 15px var(--gold); }
 
-        /* 2. 自动抓拍照片位 */
+        /* 自动抓拍照片位 */
         #snap-container { position: fixed; bottom: 20px; right: 20px; width: 120px; background: #fff; padding: 5px; transform: rotate(5deg); display: none; z-index: 6000; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
         #snap-img { width: 100%; height: 110px; object-fit: cover; background: #333; }
-        #snap-container p { color: #000; font-size: 10px; margin: 5px 0 0; font-weight: bold; }
+        #snap-container p { color: #000; font-size: 10px; margin: 5px 0 0; font-weight: bold; text-align: center; }
 
-        /* 3. 弹窗祝福 */
+        /* 弹窗祝福 */
         .py-window { position: fixed; width: 240px; border: 2px solid #000; box-shadow: 5px 5px 0 rgba(0,0,0,0.7); z-index: 5500; font-family: '微软雅黑'; }
         .py-title { background: var(--win-blue); color: white; padding: 2px 8px; display: flex; justify-content: space-between; font-weight: bold; font-size: 10px; }
         .py-body { padding: 10px; background: #dfdfdf; color: #000; text-align: center; border: 1px inset #fff; font-size: 12px; font-weight: bold; line-height: 1.4; }
 
-        .next-btn { background: var(--gold); color: #000; border: none; padding: 12px 35px; border-radius: 30px; font-weight: bold; margin-top: 25px; cursor: pointer; }
-        .mode-hint { font-size: 12px; color: var(--gold); margin-bottom: 10px; opacity: 0.8; height: 18px; }
+        .next-btn { background: var(--gold); color: #000; border: none; padding: 12px 35px; border-radius: 30px; font-weight: bold; margin-top: 25px; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .mode-hint { font-size: 13px; color: var(--gold); margin-bottom: 10px; font-weight: bold; height: 20px; text-shadow: 0 0 10px #000; }
     </style>
 </head>
 <body>
@@ -52,28 +52,28 @@
     <!-- 拍立得抓拍位 -->
     <div id="snap-container" class="animate__animated animate__jackInTheBox">
         <img id="snap-img" src="">
-        <p>2026.01.01 留影</p>
+        <p>2026 跨年留影</p>
     </div>
 
-    <!-- 0. 倒计时 -->
+    <!-- 0. 倒计时遮罩 -->
     <div id="launch-pad">
-        <div id="loading-txt" style="color: var(--gold); font-size: 14px;">正在载入 2026 龙马粒子...</div>
+        <div id="loading-txt" style="color: var(--gold); font-size: 14px; letter-spacing: 2px;">正在初始化 2026 粒子星空...</div>
     </div>
 
     <div id="main-wrapper" class="wrapper">
-        <!-- Page 0: 封面 -->
+        <!-- Page 0: 封面揭晓 -->
         <section class="screen">
             <h2 class="animate__animated animate__fadeInDown" style="color: var(--gold); letter-spacing: 5px;">2026 年度总结报告</h2>
-            <div id="keyword-box" class="animate__animated animate__zoomIn" style="display:none; font-size: 40px; color: var(--gold); margin: 30px 0; border: 2px solid var(--gold); padding: 10px 20px;">龙马精神</div>
-            <div id="reveal-trigger" onclick="revealKW()" style="width:120px; height:120px; background:var(--gold); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:60px; color:#800000; cursor:pointer; box-shadow: 0 0 40px var(--gold);">福</div>
-            <button id="p1-btn" class="next-btn" style="display:none;" onclick="goPage(1)">开启报告</button>
+            <div id="keyword-box" class="animate__animated animate__zoomIn" style="display:none; font-size: 40px; color: var(--gold); margin: 35px 0; border: 2.5px solid var(--gold); padding: 10px 20px; border-radius: 10px;">龙马精神</div>
+            <div id="reveal-trigger" onclick="revealKW()" style="width:125px; height:125px; background:var(--gold); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:65px; color:#800000; cursor:pointer; box-shadow: 0 0 40px var(--gold);">福</div>
+            <button id="p1-btn" class="next-btn" style="display:none;" onclick="goPage(1)">开启连接</button>
         </section>
 
         <!-- Page 1: 回忆 -->
         <section class="screen">
             <div class="glass-card">
                 <div class="photo-frame"><img id="user-photo" src="" style="width:100%; height:100%; object-fit:cover;" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=horse'"></div>
-                <h3 style="color: var(--gold);">年度回忆 · 2025</h3>
+                <h3 style="color: var(--gold); letter-spacing: 2px; margin: 0;">年度回忆 · 2025</h3>
                 <p id="p2-text" style="line-height: 1.8; text-align: justify; margin-top: 15px; font-size: 14px;"></p>
                 <button class="next-btn" onclick="goPage(2)">纵马前行</button>
             </div>
@@ -82,10 +82,10 @@
         <!-- Page 2: 未来 -->
         <section class="screen">
             <div class="glass-card">
-                <div style="font-size: 50px;">🐎</div>
+                <div style="font-size: 55px; margin-bottom: 20px;">🐎</div>
                 <h3 style="color: var(--gold);">2026 未来愿景</h3>
                 <p id="p3-text" style="line-height: 2; margin-top: 20px; font-size: 16px;"></p>
-                <button class="next-btn" onclick="requestPermissions()">双模控福</button>
+                <button class="next-btn" onclick="requestPermissions()">进入感应福袋</button>
             </div>
         </section>
 
@@ -96,28 +96,30 @@
                 <img src="fudai.png" class="fudai-img" alt="福袋">
                 <div id="rope" class="rope-box"><div class="rope-end"></div></div>
             </div>
-            <p style="color: var(--gold); margin-top: 20px; opacity: 0.6; font-size: 12px;">握拳 或 说出“开” 触发奇迹</p>
+            <p style="color: var(--gold); margin-top: 25px; opacity: 0.7; font-size: 12px; font-weight: bold;">【握拳】 或 说出【开】 触发奇迹</p>
         </section>
     </div>
 
-    <!-- 道歉层 -->
-    <div id="apology-stage" style="display:none; position:fixed; width:100%; height:100%; background:#000; z-index:9999; align-items:center; justify-content:center; padding:25px; text-align:center;">
+    <!-- 刘家易专用道歉层 -->
+    <div id="apology-stage" style="display:none; position:fixed; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:9999; align-items:center; justify-content:center; text-align:center; padding:25px;">
         <div class="glass-card animate__animated animate__zoomIn">
             <h2 style="color: var(--gold);">⚠️ 数据修正</h2>
-            <p>由于手误，之前错写了名字。<b>刘家易</b>才是正确答案！现已由赤兔快马修正。</p>
+            <p>由于我的手误，之前错写了名字。<b>刘家易</b> 才是最闪耀的写法！现已由系统紧急更正，祝你新的一年龙马精神！</p>
             <button class="next-btn" onclick="closeApo()">进入报告</button>
         </div>
     </div>
 
+    <!-- 外部库 -->
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
     <script>
+        // 1. 数据配置
         const friendData = {
             "任美伊": { keyword: "熠熠生辉", p2: "这一年，你像初升朝阳，即便有过颠簸也选择发光。那份不被积雪压垮的坚韧，是你最迷人的魔法。", p3: "2026愿你闯过高考关卡，站在大学新起点。愿你笑容常在，眼里永远盛着期待！" },
-            "刘家易": { keyword: "完胜战神", p2: "正在穿越复读副本的你，像《银魂》主角一样热血。即使日子重复，你的异想天开也从未熄灭。", p3: "2026愿你的努力像漫画分镜般兑现，目标被打上金色的“完胜”！" },
-            "荆博暄": { keyword: "煦色韶光", p2: "生活不止PPT，还有你给别人的拥抱。你身上温暖的力量，让周围的人都跟着轻松。", p3: "2026愿这份力量回馈到你身上。少点熬夜，多绽放自己。" },
+            "刘家易": { keyword: "完胜战神", p2: "正在穿越复读副本的你，像《银魂》主角一样热血。即使日子重复，你的异想天开也从未熄灭。这是你最耀眼的地方。", p3: "2026愿你的努力像漫画分镜般兑现，目标被打上金色的“完胜”！" },
+            "荆博暄": { keyword: "煦色韶光", p2: "生活不止PPT，还有你给别人的拥抱。你身上温暖的力量，让周围的人都跟着轻松。你值得被温柔以待。", p3: "2026愿这份力量回馈到你身上。少点熬夜，多绽放自己。" },
             "default": { keyword: "龙马精神", p2: "散落在不同经纬度的我们，都在为了理想攀登。感谢这一程山水，我们依然是彼此的星河。", p3: "2026愿我们在各自轨道发光，前程有奔赴，生活有回甘。" }
         };
 
@@ -128,7 +130,7 @@
         const name = urlParams.get('to');
         const data = friendData[name] || friendData["default"];
 
-        // 1. Canvas 粒子倒计时引擎
+        // 2. Canvas 烟花粒子倒计时引擎
         const canvas = document.getElementById('main-canvas');
         const ctx = canvas.getContext('2d');
         let w, h, textParticles = [], fireworks = [], stage = 'countdown', currentPage = 0;
@@ -140,8 +142,8 @@
             constructor(tx, ty, color) {
                 this.x = Math.random() * w; this.y = Math.random() * h;
                 this.tx = tx; this.ty = ty; this.color = color;
-                this.vx = (Math.random()-0.5)*12; this.vy = (Math.random()-0.5)*12;
-                this.acc = 0.15; this.fric = 0.88;
+                this.vx = (Math.random()-0.5)*15; this.vy = (Math.random()-0.5)*15;
+                this.acc = 0.16; this.fric = 0.86;
             }
             update() {
                 this.vx += (this.tx - this.x) * this.acc; this.vy += (this.ty - this.y) * this.acc;
@@ -154,7 +156,7 @@
         function createTextParticles(text) {
             const off = document.createElement('canvas'); const octx = off.getContext('2d');
             off.width = w; off.height = h;
-            octx.fillStyle = "#fff"; octx.font = `bold ${Math.min(w/2.2, 320)}px Arial`;
+            octx.fillStyle = "#fff"; octx.font = `bold ${Math.min(w/2, 300)}px Arial`;
             octx.textAlign = "center"; octx.textBaseline = "middle";
             octx.fillText(text, w/2, h/2);
             const imgData = octx.getImageData(0,0,w,h).data;
@@ -202,7 +204,7 @@
 
         function loop() {
             ctx.fillStyle = "rgba(0,0,0,0.25)"; ctx.fillRect(0,0,w,h);
-            if(Math.random() < 0.06) createFW(); updateFW();
+            if(Math.random() < 0.07) createFW(); updateFW();
             fireworks.forEach(f => {
                 if(f.active) { ctx.fillStyle = f.color; ctx.beginPath(); ctx.arc(f.x, f.y, 3, 0, Math.PI*2); ctx.fill(); }
                 else { f.p.forEach(p => { ctx.fillStyle = f.color.replace('hsl', 'hsla').replace(')', `,${p.a})`); ctx.beginPath(); ctx.arc(p.x, p.y, 2, 0, Math.PI*2); ctx.fill(); }); }
@@ -211,7 +213,7 @@
             requestAnimationFrame(loop);
         }
 
-        // 2. 交互与拍照逻辑
+        // 3. 业务逻辑
         document.getElementById('user-photo').src = `${name}.jpg`;
         document.getElementById('p2-text').innerText = data.p2;
         document.getElementById('p3-text').innerText = data.p3;
@@ -225,21 +227,21 @@
         function goPage(n) { currentPage = n; document.getElementById('main-wrapper').style.transform = `translateY(-${n*100}%)`; }
         function closeApo() { document.getElementById('apology-stage').style.display = 'none'; }
 
-        // 3. 权限请求 (语音 + 摄像头)
+        // 4. 双模交互 (手势 + 语音)
         let isExploded = false;
         async function requestPermissions() {
             goPage(3);
             const status = document.getElementById('status-display');
             
-            // 摄像头权限
+            // 摄像头 (手势)
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: true });
                 document.getElementById('hidden-video').srcObject = stream;
                 initHands();
                 status.innerText = "手势感应已激活...";
-            } catch (err) { status.innerText = "摄像头不可用，语音模式准备中..."; }
+            } catch (err) { status.innerText = "语音模式准备中..."; }
 
-            // 语音权限
+            // 语音识别
             initVoice();
         }
 
@@ -267,9 +269,9 @@
                 const reco = new SpeechRecognition();
                 reco.lang = 'zh-CN';
                 reco.onresult = (e) => { if(e.results[0][0].transcript.includes("开")) triggerBurst(); };
-                reco.onend = () => { if(!isExploded) reco.start(); };
+                reco.onend = () => { if(!isExploded) try { reco.start(); } catch(e) {} };
                 reco.start();
-                document.getElementById('status-display').innerText += " 语音识别已同步！";
+                document.getElementById('status-display').innerText += " 语音识别同步中！";
             }
         }
 
@@ -277,19 +279,22 @@
             if(isExploded) return;
             isExploded = true;
             
-            // 瞬间抓拍
-            const video = document.getElementById('hidden-video');
-            const capCanvas = document.getElementById('capture-canvas');
-            capCanvas.width = video.videoWidth; capCanvas.height = video.videoHeight;
-            capCanvas.getContext('2d').drawImage(video, 0, 0);
-            document.getElementById('snap-img').src = capCanvas.toDataURL('image/png');
-            document.getElementById('snap-container').style.display = 'block';
+            // 自动抓拍
+            try {
+                const video = document.getElementById('hidden-video');
+                const capCanvas = document.getElementById('capture-canvas');
+                capCanvas.width = video.videoWidth; capCanvas.height = video.videoHeight;
+                capCanvas.getContext('2d').drawImage(video, 0, 0);
+                document.getElementById('snap-img').src = capCanvas.toDataURL('image/png');
+                document.getElementById('snap-container').style.display = 'block';
+            } catch(e) {}
 
+            // 拉绳动画
             document.getElementById('rope').style.height = '160px';
             setTimeout(() => {
                 confetti({ particleCount: 400, spread: 110, origin: { y: 0.7 }, colors: ['#ffcc00', '#ff0000', '#fff'] });
                 spawnWindows();
-                document.getElementById('status-display').innerText = "💥 开启成功！照片已留存";
+                document.getElementById('status-display').innerText = "💥 开启成功！马年大吉！";
             }, 300);
         }
 
@@ -299,7 +304,7 @@
                     const win = document.createElement('div');
                     win.className = 'py-window animate__animated animate__zoomIn';
                     win.style.left = Math.random() * (window.innerWidth - 240) + 'px';
-                    win.style.top = Math.random() * (window.innerHeight - 100) + 'px';
+                    win.style.top = Math.random() * (window.innerHeight - 120) + 'px';
                     win.style.background = pyColors[Math.floor(Math.random()*pyColors.length)];
                     win.innerHTML = `<div class="py-title"><span>温馨祝福</span><span>×</span></div><div class="py-body">${tips[Math.floor(Math.random()*tips.length)]}</div>`;
                     document.body.appendChild(win);
