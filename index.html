@@ -3,289 +3,288 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>2026 龙马精神 · 年度总结</title>
+    <title>2026 龙马精神 · 交互总结报告</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
-        :root {
-            --red-main: #d40000;
-            --red-deep: #8a0000;
-            --gold-main: #ffcc00;
-            --gold-light: #fff7d1;
-        }
-
+        :root { --gold: #ffcc00; --red: #d40000; --dark-red: #800000; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: var(--red-deep); color: var(--gold-light); font-family: "Microsoft YaHei", sans-serif; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; color: #fff; font-family: "PingFang SC", "Microsoft YaHei", sans-serif; }
 
-        /* 全局红金背景 */
-        .universe {
-            position: fixed; width: 100%; height: 100%;
-            background: radial-gradient(circle at center, var(--red-main) 0%, var(--red-deep) 100%);
-            z-index: -2;
-        }
-        .bg-silk {
-            position: fixed; width: 100%; height: 100%;
-            background-image: url('https://www.transparenttextures.com/patterns/pinstriped-suit.png');
-            opacity: 0.2; z-index: -1;
-        }
+        /* 背景：红金渐变 */
+        .universe { position: fixed; width: 100%; height: 100%; background: radial-gradient(circle at center, var(--red) 0%, #300 100%); z-index: -2; }
+        canvas#main-canvas { position: fixed; top: 0; left: 0; z-index: -1; }
 
-        /* 0. 烟花字倒计时层 */
-        #launch-pad {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #a40000; z-index: 2000; display: flex; align-items: center; justify-content: center;
-        }
-        #firework-canvas { position: absolute; top: 0; left: 0; }
+        /* 摄像头预览窗 - 隐藏或小窗口 */
+        #video-preview { position: fixed; bottom: 10px; right: 10px; width: 100px; height: 75px; border: 2px solid var(--gold); border-radius: 8px; z-index: 2000; transform: scaleX(-1); display: none; background: #000; }
 
-        /* 1. 全屏翻页系统 */
-        .wrapper { width: 100%; height: 100%; transition: transform 0.8s cubic-bezier(0.645, 0.045, 0.355, 1); display: none; }
-        .screen { position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; }
+        /* 倒计时层 */
+        #launch-pad { position: fixed; width: 100%; height: 100%; background: #000; z-index: 3000; display: flex; align-items: center; justify-content: center; }
 
-        /* 2. 揭晓页样式 */
-        .reveal-btn {
-            width: 140px; height: 140px; background: linear-gradient(135deg, var(--gold-main), #fff);
-            border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            font-size: 60px; color: var(--red-deep); font-weight: bold; cursor: pointer;
-            box-shadow: 0 0 40px rgba(255, 204, 0, 0.5); animation: pulse 2s infinite;
-        }
-        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+        /* 内容包装器 */
+        .wrapper { width: 100%; height: 100%; transition: transform 0.8s cubic-bezier(0.65, 0, 0.35, 1); display: none; }
+        .screen { position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center; }
 
-        /* 3. 卡片样式 (B站总结感) */
-        .glass-card {
-            background: rgba(0, 0, 0, 0.2); border: 1px solid var(--gold-main);
-            border-radius: 24px; padding: 30px 20px; width: 100%; max-width: 360px;
-            text-align: center; backdrop-filter: blur(10px); box-shadow: 0 15px 35px rgba(0,0,0,0.4);
-        }
-        .photo-frame {
-            width: 180px; height: 180px; margin: 0 auto 20px;
-            border: 3px solid var(--gold-main); border-radius: 50%; overflow: hidden;
-            box-shadow: 0 0 20px var(--gold-main);
-        }
+        /* 玻璃卡片 */
+        .glass-card { background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(15px); border: 1px solid var(--gold); border-radius: 25px; padding: 25px; width: 100%; max-width: 360px; box-shadow: 0 15px 40px rgba(0,0,0,0.5); }
+        .photo-frame { width: 160px; height: 160px; margin: 0 auto 20px; border: 3px solid var(--gold); border-radius: 50%; overflow: hidden; }
 
-        /* 4. 福袋与拉绳 (使用你提供的图片) */
-        .fudai-box { position: relative; width: 300px; height: 400px; cursor: pointer; }
-        .fudai-img { width: 100%; height: 100%; object-fit: contain; z-index: 5; position: relative; }
-        .pull-rope {
-            position: absolute; bottom: 40px; left: 148px; width: 4px; height: 100px;
-            background: linear-gradient(to bottom, transparent, var(--gold-main));
-            z-index: 2; transition: height 0.2s;
-        }
-        .rope-end { width: 24px; height: 24px; background: var(--gold-main); border-radius: 50%; position: absolute; bottom: -12px; left: -10px; box-shadow: 0 0 10px var(--gold-main); }
+        /* 福袋交互 */
+        .fudai-container { position: relative; width: 280px; height: 350px; cursor: pointer; transition: transform 0.3s; }
+        .fudai-img { width: 100%; height: 100%; object-fit: contain; }
+        .rope-box { position: absolute; bottom: 40px; left: 145px; width: 4px; height: 100px; background: linear-gradient(to bottom, transparent, var(--gold)); transition: height 0.3s; }
+        .rope-end { width: 20px; height: 20px; background: var(--gold); border-radius: 50%; position: absolute; bottom: -10px; left: -8px; box-shadow: 0 0 15px var(--gold); }
 
-        /* 5. Python Tkinter 风格弹窗 */
-        .py-window {
-            position: fixed; width: 280px; min-height: 100px;
-            border: 2px solid #000; box-shadow: 5px 5px 0 rgba(0,0,0,0.5);
-            z-index: 1000; animation: pyPopup 0.3s ease-out forwards;
-            font-family: '微软雅黑', sans-serif;
-        }
-        .py-title { background: #000080; color: white; padding: 2px 8px; font-size: 12px; display: flex; justify-content: space-between; font-weight: bold; }
-        .py-body { padding: 15px; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 14px; color: #000; font-weight: 500; }
-        @keyframes pyPopup { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        /* Python Tkinter 弹窗 */
+        .py-window { position: fixed; width: 260px; border: 2px solid #000; box-shadow: 5px 5px 0 rgba(0,0,0,0.6); z-index: 1500; font-size: 13px; font-family: '微软雅黑'; }
+        .py-title { background: #000080; color: white; padding: 2px 8px; display: flex; justify-content: space-between; font-weight: bold; font-size: 11px; }
+        .py-body { padding: 12px; background: #dfdfdf; color: #000; min-height: 60px; display: flex; align-items: center; justify-content: center; text-align: center; border: 1px inset #fff; }
 
-        /* 导航按钮 */
-        .next-btn {
-            background: var(--gold-main); color: var(--red-deep);
-            border: none; padding: 12px 35px; border-radius: 30px;
-            font-weight: bold; font-size: 16px; margin-top: 25px; cursor: pointer;
-        }
+        /* 按钮 */
+        .next-btn { background: var(--gold); color: var(--dark-red); border: none; padding: 12px 30px; border-radius: 30px; font-weight: bold; margin-top: 20px; cursor: pointer; }
+        
+        #gesture-hint { position: fixed; bottom: 120px; width: 100%; text-align: center; color: var(--gold); font-size: 14px; text-shadow: 0 0 10px #000; z-index: 100; }
     </style>
 </head>
 <body>
 
     <div class="universe"></div>
-    <div class="bg-silk"></div>
+    <canvas id="main-canvas"></canvas>
+    <video id="hidden-video" style="display:none;" autoplay playsinline></video>
+    <canvas id="video-preview"></canvas>
 
-    <!-- 0. 烟花字倒计时 -->
+    <!-- 1. 开场倒计时 -->
     <div id="launch-pad">
-        <canvas id="firework-canvas"></canvas>
-    </div>
-
-    <div id="main-wrapper" class="wrapper">
-        <!-- Page 1: 揭晓封面 -->
-        <section class="screen">
-            <div class="animate__animated animate__fadeInDown" style="font-size: 14px; letter-spacing: 4px; color: var(--gold-main);">2026 年度限定报告</div>
-            <h1 id="user-title" class="animate__animated animate__fadeIn" style="font-size: 38px; margin: 20px 0 40px; text-shadow: 0 0 10px var(--gold-main);">你好，朋友</h1>
-            
-            <div id="keyword-tag" class="animate__animated animate__zoomIn" style="font-size: 45px; color: var(--gold-main); display:none; border: 2px solid var(--gold-main); padding: 10px 20px; border-radius: 10px; margin-bottom: 40px;">龙马精神</div>
-
-            <div id="reveal-area">
-                <div class="reveal-btn" onclick="revealKeyword()">福</div>
-                <p style="margin-top: 20px; letter-spacing: 2px; color: var(--gold-main);">揭晓你的年度关键词</p>
-            </div>
-            
-            <button id="p1-next" class="next-btn" style="display:none;" onclick="goPage(1)">开启连接</button>
-        </section>
-
-        <!-- Page 2: 年度回忆 -->
-        <section class="screen">
-            <div class="glass-card">
-                <div style="font-size: 12px; letter-spacing: 3px; color: var(--gold-main); margin-bottom: 20px;">MEMORIES · 2025</div>
-                <div class="photo-frame">
-                    <img id="user-photo" src="" style="width:100%; height:100%; object-fit:cover;" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=horse'">
-                </div>
-                <h2 id="p2-title" style="color: var(--gold-main); margin-bottom: 15px;"></h2>
-                <p id="p2-text" style="font-size: 16px; line-height: 1.8; text-align: justify;"></p>
-                <button class="next-btn" onclick="goPage(2)">纵马前行</button>
-            </div>
-        </section>
-
-        <!-- Page 3: 未来展望 -->
-        <section class="screen">
-            <div class="glass-card">
-                <div style="font-size: 40px; margin-bottom: 20px;">🐎</div>
-                <h2 style="color: var(--gold-main); margin-bottom: 20px;">2026 未来愿景</h2>
-                <p id="p3-text" style="font-size: 18px; line-height: 2;"></p>
-                <button class="next-btn" onclick="goPage(3)">抽取福袋</button>
-            </div>
-        </section>
-
-        <!-- Page 4: 终极福袋 -->
-        <section class="screen">
-            <h2 class="animate__animated animate__fadeInDown" style="color: var(--gold-main); margin-bottom: 30px;">拉动绳子，开启万福</h2>
-            <div class="fudai-box" ontouchstart="ropeActive(true)" ontouchend="ropeActive(false)" onclick="explodeFudai()">
-                <img src="fudai.png" class="fudai-img" alt="福袋">
-                <div id="rope" class="pull-rope">
-                    <div class="rope-end"></div>
-                </div>
-            </div>
-            <p style="color: var(--gold-main); opacity: 0.6; margin-top: 20px;">—— 点击福袋或拉动绳子 ——</p>
-        </section>
-    </div>
-
-    <!-- 刘家易道歉层 -->
-    <div id="apology-stage" style="display:none; position:fixed; width:100%; height:100%; background:var(--red-deep); z-index:5000; align-items:center; justify-content:center;">
-        <div class="glass-card animate__animated animate__zoomIn">
-            <h2 style="color: var(--gold-main);">🙇‍♀️ 特别更正声明</h2>
-            <p>由于我的手误，刚才在名字录入中出现了偏差。<b>刘家易</b>才是最正确的打开方式！请接受这份来自马年的歉意。</p>
-            <button class="next-btn" onclick="closeApology()">接受道歉并进入</button>
+        <div style="text-align: center; z-index: 3100;">
+            <p id="loading-msg" style="color: var(--gold);">正在初始化 2026 粒子流...</p>
         </div>
     </div>
 
+    <!-- 主视图 -->
+    <div id="main-wrapper" class="wrapper">
+        <!-- Page 1: 揭晓 -->
+        <section class="screen">
+            <h2 id="welcome-tag" class="animate__animated animate__fadeIn">2026 年度报告</h2>
+            <div id="keyword-box" class="animate__animated animate__zoomIn" style="display:none; font-size: 40px; color: var(--gold); margin: 30px 0; border: 2px solid var(--gold); padding: 10px 20px;">龙马精神</div>
+            <div id="reveal-trigger" onclick="revealKW()" style="width:120px; height:120px; background:var(--gold); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:60px; color:var(--dark-red); cursor:pointer; box-shadow: 0 0 30px var(--gold);">福</div>
+            <button id="p1-btn" class="next-btn" style="display:none;" onclick="goPage(1)">开启连接</button>
+        </section>
+
+        <!-- Page 2: 回忆 -->
+        <section class="screen">
+            <div class="glass-card">
+                <div class="photo-frame"><img id="user-photo" src="" style="width:100%; height:100%; object-fit:cover;" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=horse'"></div>
+                <h3 id="p2-title" style="color: var(--gold);">年度回忆</h3>
+                <p id="p2-text" style="line-height: 1.8; text-align: justify;"></p>
+                <button class="next-btn" onclick="goPage(2)">下一步</button>
+            </div>
+        </section>
+
+        <!-- Page 3: 未来 -->
+        <section class="screen">
+            <div class="glass-card">
+                <div style="font-size: 50px;">🐎</div>
+                <h3 style="color: var(--gold); margin: 20px 0;">2026 未来愿景</h3>
+                <p id="p3-text" style="line-height: 2;"></p>
+                <button class="next-btn" onclick="goPage(3)">进入交互福袋</button>
+            </div>
+        </section>
+
+        <!-- Page 4: 交互福袋 -->
+        <section class="screen">
+            <div id="gesture-hint">正在检测手势...<br>请在摄像头前【张开手掌】再【用力握拳】</div>
+            <div id="fudai-box" class="fudai-container">
+                <img src="fudai.png" class="fudai-img" alt="福袋">
+                <div id="rope" class="rope-box"><div class="rope-end"></div></div>
+            </div>
+            <p style="color: var(--gold); margin-top: 20px; opacity: 0.6;">(无法调用摄像头时，点击福袋亦可开启)</p>
+        </section>
+    </div>
+
+    <!-- 刘家易专用道歉层 -->
+    <div id="apology-stage" style="display:none; position:fixed; width:100%; height:100%; background:rgba(100,0,0,0.95); z-index:5000; align-items:center; justify-content:center; text-align:center; padding:20px;">
+        <div class="glass-card animate__animated animate__zoomIn">
+            <h2 style="color: var(--gold);">⚠️ 修正声明</h2>
+            <p>对不起，<b>刘家易</b>！由于数据录入偏差，之前错误显示了名字。现已修正，祝你马年大吉！</p>
+            <button class="next-btn" onclick="closeApo()">进入报告</button>
+        </div>
+    </div>
+
+    <!-- 脚本引用 -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
     <script>
-        // 祝福语库 (来自你的 Python 代码)
+        const friendData = {
+            "任美伊": { keyword: "熠熠生辉", p2: "这一年，你像初升朝阳，即便有过颠簸也选择发光。那份不被积雪压垮的坚韧，是你最迷人的魔法。", p3: "2026愿你闯过高考关卡，站在大学新起点。愿你脚步轻快，笑容常在，眼里永远盛着期待！", p4: "新年快乐！" },
+            "刘家易": { keyword: "完胜战神", p2: "正在穿越复读副本的你，像《银魂》主角一样热血。即使日子重复，你的异想天开也从未熄灭。这是你最耀眼的地方。", p3: "2026愿你的努力像漫画分镜般兑现，目标被打上金色的“完胜”！大学生活在更酷的副本等着你。", p4: "冲呀！" },
+            "荆博暄": { keyword: "煦色韶光", p2: "生活不止PPT，还有你给别人的拥抱。你身上温暖的力量，让周围的人都跟着轻松。你值得被温柔以待。", p3: "2026愿这份力量回馈到你身上。少点熬夜，多绽放自己。好运一定会准时到达！", p4: "万事顺意！" },
+            "default": { keyword: "龙马精神", p2: "散落在不同经纬度的我们，都在为了理想攀登。感谢这一程山水，我们依然是彼此的星河。", p3: "2026愿我们在各自轨道发光，前程有奔赴，生活有回甘。敲开理想生活的密钥！", p4: "一起走吧！" }
+        };
+
         const tips = [
-            '愿你三冬暖，春不寒，天黑有灯，下雨有伞，路上有良人相伴，一生被温柔以待。',
-            '愿你遍历山河，觉得人间值得，无论经历多少风雨，都能保持内心的澄澈与热爱。',
-            '愿你所求皆如愿，所行皆坦途，日子如熹光，温柔又明亮，每天都有小确幸相伴。',
-            '愿你被这个世界温柔以待，躲不过的惊吓都只是虚惊一场，收到的欢喜都恰如所期。',
-            '愿你往后余生，快乐是本能，幸福是常态，不为往事忧，只为余生笑，活得自在洒脱。',
-            '愿你有高跟鞋也有跑鞋，喝茶也喝酒，有勇敢的朋友，也有强大的对手，活出自己的精彩。',
-            '愿你眼中总有光芒，活成自己喜欢的模样，走过千山万水，归来仍是少年，初心不改。',
-            '愿你在迷茫时，坚信自己的珍贵，爱你所爱，行你所行，听从你心，无问西东，终会抵达。',
-            '愿你一生努力，一生被爱，想要的都拥有，得不到的都释怀，平安喜乐，顺遂无忧。',
-            '愿你如向日葵般，永远向阳而生，无论遇到什么困境，都能找到温暖的光芒与前行的力量。'
+            "🎉 万事如意！", "💖 心想事成！", "🌟 前程似锦！", "🎊 幸福安康！", "🌈 好运连连！",
+            "✨ 笑口常开！", "🎁 财源广进！", "🌺 事业有成！", "🎵 快乐每一天！", "🌸 福星高照！",
+            "🎯 心愿成真！", "🌻 平安喜乐！", "🎈 步步高升！", "💫 吉祥如意！", "🌙 梦想成真！",
+            "🌟记得吃早饭", "🌺别不开心", "🍀都会好起来的", "🌸没事的，没事的", "💫你是最棒的",
+            "🌷注意保暖", "🌻做自己就好", "💖爱人先爱己", "✨你最好看了", "🍙吃饭了没",
+            "🌼照顾好自己", "💧多喝水", "😊记得多笑笑", "🎈想要的都得到",
+            "🍎身体健康", "🐉锦鲤附体", "🤗抱抱你"
         ];
         const pyColors = ['#FFC0CB', '#87CEEB', '#90EE90', '#E6E6FA', '#FFFACD', '#DDA0DD', '#FF7F50', '#FFE4C4'];
-
-        const friendData = {
-            "任美伊": { keyword: "熠熠生辉", p2: "过去这一年，你像初升的朝阳一样闪闪发光。即使有过颠簸，你依然选择做最明亮的自己。这种不被雪花压垮的坚韧，真的很有感染力！", p3: "2026愿你勇敢闯过高考关卡，站在大学的新起点。愿你脚步轻快，笑容常在，眼里永远盛着对明天的期待。万事皆甜，勇往直前！" },
-            "刘家易": { keyword: "完胜战神", p2: "现在的你正和题库进行着“长期作战”，就像《银魂》里的精神一样，即使日子重复，你的异想天开也从未熄灭。这正是你最耀眼的地方。", p3: "2026愿你的努力像JUMP分镜一样逐帧兑现，愿你的目标被打上金色的“完胜”！等你荣耀归来，大学生活正等着你这个超酷的副本。" },
-            "荆博暄": { keyword: "煦色韶光", p2: "生活不止PPT，还有你递给别人的拥抱。这一年，你身上那种温暖的力量，让周围的人都跟着轻松起来。你值得被温柔以待。", p3: "2026愿这份力量更多回馈到你身上。少操心别人，多让自己尽情绽放。好运一定会准时到达！" },
-            "武蓉萱": { keyword: "灵感极客", p2: "那些与小车反复调试的深夜，塑造了你理性可靠的模样。在复杂的逻辑里，你总能找到通向成功的代码。新的一年，愿你的世界既有逻辑的优美，也有诗意的轻盈。", p3: "2026愿电路接通灵感，代码书写从容。不必总是跑得太急，偶尔也去二游的世界享受一场冒险。" },
-            "default": { keyword: "龙马精神", p2: "这一年，我们散落在不同的经纬度，各自为了理想攀登。感谢在这一程山水里，我们依然是彼此的支柱与银河。", p3: "2026愿我们在各自的轨道上发光，前程有奔赴，生活有回甘。愿笔尖与键盘，都能敲开通往理想生活的密钥。" }
-        };
 
         const urlParams = new URLSearchParams(window.location.search);
         const name = urlParams.get('to');
         const data = friendData[name] || friendData["default"];
 
-        // 1. 烟花字倒计时实现 (Canvas)
-        const canvas = document.getElementById('firework-canvas');
+        // Canvas 烟花倒计时系统
+        const canvas = document.getElementById('main-canvas');
         const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+        let w, h, particles = [], textParticles = [], countdown = 3, stage = 'countdown';
 
-        function drawFireworkText(text) {
-            ctx.clearRect(0,0,canvas.width,canvas.height);
-            ctx.fillStyle = "#ffcc00";
-            ctx.font = "bold 150px Arial";
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
-            ctx.fillText(text, canvas.width/2, canvas.height/2);
-            // 简单处理：将文字变为粒子效果 (这里做演示，实际使用更复杂的粒子库效果更好)
-            const imgData = ctx.getImageData(0,0,canvas.width,canvas.height);
-            ctx.clearRect(0,0,canvas.width,canvas.height);
-            for(let y=0; y<canvas.height; y+=6) {
-                for(let x=0; x<canvas.width; x+=6) {
-                    if(imgData.data[(y*canvas.width + x)*4 + 3] > 128) {
-                        ctx.fillStyle = `hsl(${Math.random()*360}, 100%, 70%)`;
-                        ctx.beginPath();
-                        ctx.arc(x, y, 2, 0, Math.PI*2);
-                        ctx.fill();
+        function initCanvas() { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; }
+        window.onresize = initCanvas; initCanvas();
+
+        class Particle {
+            constructor(x, y, color, targetX, targetY) {
+                this.x = x; this.y = y; this.color = color;
+                this.tx = targetX; this.ty = targetY;
+                this.vx = (Math.random()-0.5)*10; this.vy = (Math.random()-0.5)*10;
+                this.acc = 0.15; this.friction = 0.85;
+            }
+            update() {
+                let dx = this.tx - this.x; let dy = this.ty - this.y;
+                this.vx += dx * this.acc; this.vy += dy * this.acc;
+                this.vx *= this.friction; this.vy *= this.friction;
+                this.x += this.vx; this.y += this.vy;
+            }
+            draw() { ctx.fillStyle = this.color; ctx.beginPath(); ctx.arc(this.x, this.y, 2, 0, Math.PI*2); ctx.fill(); }
+        }
+
+        function createTextParticles(text) {
+            const off = document.createElement('canvas');
+            const octx = off.getContext('2d');
+            off.width = w; off.height = h;
+            octx.fillStyle = "#fff";
+            octx.font = `bold ${Math.min(w/2, 300)}px Arial`;
+            octx.textAlign = "center"; octx.textBaseline = "middle";
+            octx.fillText(text, w/2, h/2);
+            const imgData = octx.getImageData(0,0,w,h).data;
+            textParticles = [];
+            for(let y=0; y<h; y+=7) {
+                for(let x=0; x<w; x+=7) {
+                    if(imgData[(y*w+x)*4+3] > 128) {
+                        textParticles.push(new Particle(Math.random()*w, Math.random()*h, varColor(), x, y));
                     }
                 }
             }
         }
+        function varColor() { return `hsl(${Math.random()*360}, 100%, 75%)`; }
 
-        let count = 3;
-        const countTimer = setInterval(() => {
-            if(count > 0) {
-                drawFireworkText(count);
-                count--;
-            } else if (count === 0) {
-                drawFireworkText("2026");
-                count--;
-            } else {
-                clearInterval(countTimer);
-                document.getElementById('launch-pad').classList.add('animate__animated', 'animate__fadeOut');
-                setTimeout(() => {
-                    document.getElementById('launch-pad').style.display = 'none';
-                    document.getElementById('main-wrapper').style.display = 'block';
-                    if(name === "刘家易") document.getElementById('apology-stage').style.display = 'flex';
-                }, 1000);
+        // 烟花背景
+        let fws = [];
+        function createFW() {
+            fws.push({x: Math.random()*w, y: h, ty: Math.random()*h*0.5, c: varColor(), active: true, p: []});
+        }
+        function updateFW() {
+            fws.forEach((f, idx) => {
+                if(f.active) { f.y -= 10; if(f.y <= f.ty) { f.active = false; for(let i=0; i<30; i++) f.p.push({x: f.x, y: f.y, vx: (Math.random()-0.5)*8, vy: (Math.random()-0.5)*8, a: 1}); } }
+                else { f.p.forEach(p => { p.x += p.vx; p.y += p.vy; p.vy += 0.1; p.a -= 0.02; }); f.p = f.p.filter(p => p.a > 0); if(f.p.length === 0) fws.splice(idx, 1); }
+            });
+        }
+
+        // 倒计时流程
+        let timer = setInterval(() => {
+            if(countdown > 0) { createTextParticles(countdown.toString()); countdown--; }
+            else if(countdown === 0) { createTextParticles("2026"); countdown--; }
+            else { 
+                clearInterval(timer); stage = 'main'; 
+                document.getElementById('launch-pad').style.display = 'none';
+                document.getElementById('main-wrapper').style.display = 'block';
+                if(name === "刘家易") document.getElementById('apology-stage').style.display = 'flex';
+                initHands();
             }
         }, 1500);
 
-        // 初始化内容
-        document.getElementById('user-title').innerText = name ? `你好，${name}` : "你好，朋友";
-        document.getElementById('keyword-tag').innerText = data.keyword;
+        function loop() {
+            ctx.fillStyle = "rgba(0,0,0,0.2)"; ctx.fillRect(0,0,w,h);
+            if(stage === 'countdown') {
+                if(Math.random() < 0.05) createFW();
+                updateFW();
+                fws.forEach(f => {
+                    if(f.active) { ctx.fillStyle = f.c; ctx.beginPath(); ctx.arc(f.x, f.y, 3, 0, Math.PI*2); ctx.fill(); }
+                    else { f.p.forEach(p => { ctx.fillStyle = f.c.replace(')', `,${p.a})`).replace('hsl', 'hsla'); ctx.beginPath(); ctx.arc(p.x, p.y, 2, 0, Math.PI*2); ctx.fill(); }); }
+                });
+                textParticles.forEach(p => { p.update(); p.draw(); });
+            } else {
+                // 主界面背景简单烟花
+                if(Math.random() < 0.03) createFW();
+                updateFW();
+                fws.forEach(f => {
+                    f.p.forEach(p => { ctx.fillStyle = f.c; ctx.beginPath(); ctx.arc(p.x, p.y, 1.5, 0, Math.PI*2); ctx.fill(); });
+                });
+            }
+            requestAnimationFrame(loop);
+        }
+        loop();
+
+        // 业务逻辑
+        document.getElementById('user-photo').src = `${name}.jpg`;
         document.getElementById('p2-text').innerText = data.p2;
         document.getElementById('p3-text').innerText = data.p3;
-        if(name) document.getElementById('user-photo').src = `${name}.jpg`;
-
-        // 交互逻辑
-        function revealKeyword() {
-            document.getElementById('reveal-area').style.display = 'none';
-            document.getElementById('keyword-tag').style.display = 'inline-block';
-            document.getElementById('p1-next').style.display = 'inline-block';
-            confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#ffcc00', '#ff0000'] });
+        function revealKW() {
+            document.getElementById('reveal-trigger').style.display = 'none';
+            document.getElementById('keyword-box').style.display = 'inline-block';
+            document.getElementById('p1-btn').style.display = 'inline-block';
+            confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
         }
+        function goPage(n) { document.getElementById('main-wrapper').style.transform = `translateY(-${n*100}%)`; }
+        function closeApo() { document.getElementById('apology-stage').style.display = 'none'; }
 
-        function goPage(idx) { document.getElementById('main-wrapper').style.transform = `translateY(-${idx * 100}%)`; }
-        function closeApology() { document.getElementById('apology-stage').style.display = 'none'; }
-        
-        function ropeActive(active) {
-            document.getElementById('rope').style.height = active ? '160px' : '100px';
-        }
-
-        // 核心：模拟 Python 弹窗流
-        function explodeFudai() {
-            ropeActive(true);
-            setTimeout(() => {
-                confetti({ particleCount: 300, spread: 100, origin: { y: 0.8 }, colors: ['#ffcc00', '#ff0000', '#fff'] });
-                
-                // 模拟 Python 创建 100 个祝福窗口
-                for(let i=0; i<80; i++) {
-                    setTimeout(() => {
-                        const win = document.createElement('div');
-                        win.className = 'py-window';
-                        const tip = tips[Math.floor(Math.random()*tips.length)];
-                        const bg = pyColors[Math.floor(Math.random()*pyColors.length)];
-                        
-                        win.style.left = Math.random() * (window.innerWidth - 280) + 'px';
-                        win.style.top = Math.random() * (window.innerHeight - 150) + 'px';
-                        win.style.background = bg;
-
-                        win.innerHTML = `
-                            <div class="py-title"><span>温馨祝福</span><span>×</span></div>
-                            <div class="py-body">${tip}</div>
-                        `;
-                        document.body.appendChild(win);
-                        
-                        // 6秒后自动消失
-                        setTimeout(() => win.remove(), 6000);
-                    }, i * 100);
+        // 手势识别核心
+        let wasFist = false;
+        let isExploded = false;
+        function initHands() {
+            const videoElement = document.getElementById('hidden-video');
+            const hands = new Hands({ locateFile: (f) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${f}` });
+            hands.setOptions({ maxNumHands: 1, modelComplexity: 1, minDetectionConfidence: 0.5 });
+            hands.onResults((res) => {
+                if (res.multiHandLandmarks && res.multiHandLandmarks.length > 0) {
+                    const lm = res.multiHandLandmarks[0];
+                    const isFist = lm[8].y > lm[6].y && lm[12].y > lm[10].y && lm[16].y > lm[14].y;
+                    if (isFist && !wasFist) triggerBurst();
+                    wasFist = isFist;
                 }
+            });
+            const camera = new Camera(videoElement, { onFrame: async () => { await hands.send({image: videoElement}); } });
+            camera.start();
+        }
+
+        document.getElementById('fudai-box').onclick = triggerBurst;
+
+        function triggerBurst() {
+            if(isExploded) return;
+            isExploded = true;
+            document.getElementById('rope').style.height = '150px';
+            setTimeout(() => {
+                confetti({ particleCount: 300, spread: 120, origin: { y: 0.7 }, colors: ['#ffcc00', '#ff0000', '#fff'] });
+                spawnWindows();
             }, 300);
+        }
+
+        function spawnWindows() {
+            for(let i=0; i<60; i++) {
+                setTimeout(() => {
+                    const win = document.createElement('div');
+                    win.className = 'py-window animate__animated animate__zoomIn';
+                    win.style.left = Math.random() * (window.innerWidth - 260) + 'px';
+                    win.style.top = Math.random() * (window.innerHeight - 100) + 'px';
+                    win.style.background = pyColors[Math.floor(Math.random()*pyColors.length)];
+                    win.innerHTML = `<div class="py-title"><span>温馨祝福</span><span>×</span></div><div class="py-body">${tips[Math.floor(Math.random()*tips.length)]}</div>`;
+                    document.body.appendChild(win);
+                    setTimeout(() => { win.classList.add('animate__fadeOut'); setTimeout(()=>win.remove(), 500); }, 6000);
+                }, i * 120);
+            }
         }
     </script>
 </body>
